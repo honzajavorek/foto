@@ -5,15 +5,17 @@ Elk, my personal photo manager.
 """
 
 
-import sys
-import os
-import getopt
-
 import config
+import getopt
+import os
+import sync
+import sys
+import upload
+
 
 
 __author__ = 'Honza Javorek'
-__copyright__ = 'Copyright 2010, Honza Javorek'
+__copyright__ = 'Copyright 2010-2011, Honza Javorek'
 __credits__ = ['Martin Javorek', 'Phil Harvey']
 
 __version__ = '0.1'
@@ -29,9 +31,11 @@ class Controller:
         
     def __run(self, action, arg=None):
         if action == 'upload':
-            print 'upload'
+            u = upload.Uploader()
+            u.run()
         elif action == 'sync':
-            print 'sync %s' % (arg)
+            s = sync.Synchronizer(arg)
+            s.run()
         sys.exit(0)
     
     def __wrap_safe_mode(self, action, arg=None):
@@ -47,8 +51,7 @@ class Controller:
     
     def __parse_args(self, argv):
         try:
-            opts, args = getopt.getopt(argv, 'hud', ['help', 'upload', 'debug', 'sync='])
-            playlist = None
+            opts, args = getopt.getopt(argv, 'huds', ['help', 'upload', 'debug', 'sync='])
             cfg = config.Config()
             
             for opt, arg in opts:
@@ -58,9 +61,9 @@ class Controller:
                 elif opt in ('-d', '--debug'):
                     cfg.set('application', 'debug', str(True))
                 elif opt in ('-u', '--upload'):
-                    self.__run('upload')
-                elif opt in ('--sync'):
-                    self.__run('sync', arg)
+                    self.__wrap_safe_mode('upload')
+                elif opt in ('-s', '--sync'):
+                    self.__wrap_safe_mode('sync', arg)
                     
             self.__usage()
             sys.exit(0)
@@ -76,10 +79,11 @@ Usage:
     Always works with current directory (considered then as album).
 
     OPTIONS:
-    -h, --help        print usage summary (this screen)
-    -d, --debug       debug mode
-    -u, --upload      uploads current directory to Picasa
-    --sync=albumID    synchronizes current directory with Picasa
+    -h, --help              print usage summary (this screen)
+    -d, --debug             debug mode
+    -u, --upload            uploads current directory to Picasa
+    -s, --sync=albumID      synchronizes current directory with Picasa
+                            (albumID: name or hash, current dir name taken as default)
 '''
 
 if __name__ == '__main__':
