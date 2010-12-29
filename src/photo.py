@@ -5,6 +5,7 @@ Photo file.
 """
 
 
+import log
 import os
 import re
 import subprocess
@@ -21,6 +22,7 @@ class Photo:
         return os.path.basename(self.photo_file)
     
     def set_caption(self, caption):
+        log.log('ok', 'Setting caption to %s file.' % self.get_basename())
         subprocess.Popen(('exiftool', self.photo_file, '-charset', 'iptc=UTF8', '-Caption-Abstract=""', '-Headline="%s"' % caption), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
     def get_caption(self):

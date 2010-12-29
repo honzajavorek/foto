@@ -17,6 +17,11 @@ class Uploader:
         print 'upload'
         
     def run(self):
+        # vyparsuje datum a nazev z nazvu slozky
+        # najde textak s popisem a s geo mistem
+        # ...
+        
+        # remote_album.published.text
         pass
 
 

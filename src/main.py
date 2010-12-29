@@ -7,6 +7,7 @@ Elk, my personal photo manager.
 
 import config
 import getopt
+import log
 import os
 import sync
 import sys
@@ -51,7 +52,7 @@ class Controller:
     
     def __parse_args(self, argv):
         try:
-            opts, args = getopt.getopt(argv, 'huds', ['help', 'upload', 'debug', 'sync='])
+            opts, args = getopt.getopt(argv, 'huds', ['help', 'upload', 'debug', 'sync=']) #@UnusedVariable
             cfg = config.Config()
             
             for opt, arg in opts:
@@ -60,9 +61,12 @@ class Controller:
                     sys.exit(0)
                 elif opt in ('-d', '--debug'):
                     cfg.set('application', 'debug', str(True))
+                    log.log('info', 'Debug mode.')
                 elif opt in ('-u', '--upload'):
+                    log.log('info', 'Starting upload.')
                     self.__wrap_safe_mode('upload')
                 elif opt in ('-s', '--sync'):
+                    log.log('info', 'Starting synchronization.')
                     self.__wrap_safe_mode('sync', arg)
                     
             self.__usage()

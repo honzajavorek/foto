@@ -7,16 +7,18 @@ Directory as album.
 
 from glob import glob
 import config
+import gdata.photos #@UnresolvedImport
+import log
 import os
 import photo
 import re
-import sys
 
 
 class Album:
 
     album_file = None
     album_id = None
+    info_file = None
     
     remote_album = None
 
@@ -27,14 +29,16 @@ class Album:
             self.album_id = re.sub(r'^[\d\-]+\s*', '', album_name)
         else:
             self.album_id = album_id
+            
+        self.info_file = self.album_file + '/' + config.Config().get('settings', 'info_file')
 
     def get_remote(self):
         if (self.remote_album):
             return self.remote_album 
         
-        picasa = config.Config().get('picasa', 'client')
+        picasa = config.Config().get('settings', 'picasa_client')
         
-        albums = picasa.GetUserFeed(user=config.Config().get('picasa', 'user'))
+        albums = picasa.GetUserFeed(user=config.Config().get('settings', 'user'))
         album = None
         for a in albums.entry:
             if a and (self.__to_unicode(a.gphoto_id.text) == self.__to_unicode(self.album_id) or self.__to_unicode(a.title.text) == self.__to_unicode(self.album_id)):
@@ -51,23 +55,55 @@ class Album:
         return photo.Photo(self.album_file + '/' + photo_file)
     
     def get_remote_photos(self):
-        picasa = config.Config().get('picasa', 'client')
+        picasa = config.Config().get('settings', 'picasa_client')
         album = self.get_remote()
         photos = picasa.GetFeed('/data/feed/api/user/default/albumid/%s?kind=photo' % album.gphoto_id.text)
         return photos.entry
         
-        #for photo in photos.entry:
-            #photo.media.description.text
-            #photo.title.text
-            
     def get_photos(self):
-        #os.chdir(config.Config().get('application', 'workingDirectory'))
         return glob(os.path.join(self.album_file, '*.[jJ][pP][gG]'))
 
-        #for file in glob...:
-            #photo_file = os.path.basename(file)
-            #print self.__get_caption(photo_file)
-            
+    def info_file_exists(self):
+        return os.path.exists(self.info_file)
+    
+    def create_info_file(self):
+        log.log('info', 'Creating new info file.')
+        remote_album = self.get_remote()
+        contents = "%s\n(%s)\n\n%s\n" % (remote_album.title.text, remote_album.location.text, remote_album.summary.text)
+        
+        info_file = open(self.info_file, 'w')
+        info_file.write(contents)
+        info_file.close()
+        log.log('info', 'New info file created.')
+        
+    def parse_info_file(self):
+        log.log('info', 'Parsing info file.')
+        contents = file(self.info_file).read()
+        matches = re.compile(r'([^\n]+)\n(\((.+)\)\n)?(\n([^\n]+))?\s*', re.MULTILINE|re.DOTALL).match(contents)
+        return { 'title': matches.group(1), 'location': matches.group(3), 'summary': matches.group(5) }
+        
+    def sync_info_file(self):
+        contents = self.parse_info_file()
+        remote_album = self.get_remote()
+        
+        log.log('info', 'Synchronizing info file values.')
+        # if local value does not exist in remote album, update this attribute in remote album (and vv)
+        for key in contents.iterkeys():
+            if (not remote_album.__dict__[key].text) and contents[key]:
+                log.log('info', 'Value "%s" updated remotely.' % key)
+                remote_album.__dict__[key].text = contents[key]
+            elif (not contents[key]) and remote_album.__dict__[key].text:
+                log.log('info', 'Value "%s" updated locally.' % key)
+                contents[key] = remote_album.__dict__[key].text
+            else:
+                log.log('info', 'Value "%s" left without changes.' % key)
+                
+        log.log('info', 'Saving info remotely.')
+        picasa = config.Config().get('settings', 'picasa_client')
+        self.remote_album = picasa.Put(remote_album, remote_album.GetEditLink().href, converter=gdata.photos.AlbumEntryFromString)
+
+        self.create_info_file()
+
     def __to_unicode(self, object, encoding='utf-8'):
         """Recodes string to Unicode"""
         
