@@ -21,12 +21,16 @@ class Album:
     info_file = None
     
     remote_album = None
+    published = None
 
     def __init__(self, album_file, album_id=None):
         self.album_file = album_file
+        
+        parsed_album_name = self.parse_album_name()
+        self.published = parsed_album_name['published']
+        
         if not album_id:
-            album_name = os.path.basename(os.path.dirname(album_file + '/..'))
-            self.album_id = re.sub(r'^[\d\-]+\s*', '', album_name)
+            self.album_id = parsed_album_name['title']
         else:
             self.album_id = album_id
             
@@ -82,6 +86,12 @@ class Album:
         matches = re.compile(r'([^\n]+)\n(\((.+)\)\n)?(\n([^\n]+))?\s*', re.MULTILINE|re.DOTALL).match(contents)
         return { 'title': matches.group(1), 'location': matches.group(3), 'summary': matches.group(5) }
         
+    def parse_album_name(self):
+        log.log('info', 'Parsing album name.')
+        name = os.path.basename(self.album_file)
+        matches = re.compile(r'([\d\-]+)\s*(.+)').match(name)
+        return { 'title': matches.group(2).strip(), 'published': matches.group(1).strip() }
+    
     def sync_info_file(self):
         contents = self.parse_info_file()
         remote_album = self.get_remote()
@@ -101,6 +111,12 @@ class Album:
                 local_changed = True
             else:
                 log.log('info', 'Value "%s" left without changes.' % key)
+        
+        # sync date
+        if not remote_album.published.text:
+            log.log('info', 'Synchronizing date of publishing.')
+            remote_album.published.text = self.published
+            remote_changed = True
         
         if remote_changed:
             log.log('info', 'Saving info remotely.')
