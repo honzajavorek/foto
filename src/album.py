@@ -46,7 +46,7 @@ class Album:
                 break
         
         if not album:
-            raise Exception('Album %s does not exist.' % self.album_id)
+            raise Exception('Album does not exist.')
         
         self.remote_album = album
         return album

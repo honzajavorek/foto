@@ -44,15 +44,20 @@ class Photo:
     def get_caption(self):
         p = subprocess.Popen(('exiftool', self.photo_file, '-charset', 'iptc=UTF8', '-Headline'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = p.communicate()[0]
-        headline = self.__recode(re.sub(r'\s*$', '', re.sub(r'^[^:]+:\s*', '', output)), 'utf-8').strip('"')
+        
+        if re.match('Warning', output):
+            headline = ''
+        else:
+            headline = self.__recode(re.sub(r'\s*$', '', re.sub(r'^[^:]+:\s*', '', output)), 'utf-8').strip('"')
         
         if not headline:
             p = subprocess.Popen(('exiftool', self.photo_file, '-charset', 'iptc=UTF8', '-Caption-Abstract'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             output = p.communicate()[0]
             caption = self.__recode(re.sub(r'\s*$', '', re.sub(r'^[^:]+:\s*', '', output)), 'utf-8').strip('"')
             
-            log.log('warning', 'Caption is not placed correctly in tags! Starting autocorrection...')
-            self.set_caption(caption)
+            if caption:
+                log.log('warning', 'Caption is not placed correctly in tags! Starting autocorrection...')
+                self.set_caption(caption)
             
             return caption
         return headline
