@@ -51,8 +51,8 @@ class Album:
         self.remote_album = album
         return album
     
-    def get_photo(self, photo_file):
-        return photo.Photo(self.album_file + '/' + photo_file)
+    def get_photo(self, photo_file, remote_photo=None):
+        return photo.Photo(self.album_file + '/' + photo_file, remote_photo)
     
     def get_remote_photos(self):
         picasa = config.Config().get('settings', 'picasa_client')
@@ -87,22 +87,28 @@ class Album:
         remote_album = self.get_remote()
         
         log.log('info', 'Synchronizing info file values.')
+        remote_changed = False
+        local_changed = False
         # if local value does not exist in remote album, update this attribute in remote album (and vv)
         for key in contents.iterkeys():
             if (not remote_album.__dict__[key].text) and contents[key]:
                 log.log('info', 'Value "%s" updated remotely.' % key)
                 remote_album.__dict__[key].text = contents[key]
+                remote_changed = True
             elif (not contents[key]) and remote_album.__dict__[key].text:
                 log.log('info', 'Value "%s" updated locally.' % key)
                 contents[key] = remote_album.__dict__[key].text
+                local_changed = True
             else:
                 log.log('info', 'Value "%s" left without changes.' % key)
-                
-        log.log('info', 'Saving info remotely.')
-        picasa = config.Config().get('settings', 'picasa_client')
-        self.remote_album = picasa.Put(remote_album, remote_album.GetEditLink().href, converter=gdata.photos.AlbumEntryFromString)
+        
+        if remote_changed:
+            log.log('info', 'Saving info remotely.')
+            picasa = config.Config().get('settings', 'picasa_client')
+            self.remote_album = picasa.Put(remote_album, remote_album.GetEditLink().href, converter=gdata.photos.AlbumEntryFromString)
 
-        self.create_info_file()
+        if local_changed:
+            self.create_info_file()
 
     def __to_unicode(self, object, encoding='utf-8'):
         """Recodes string to Unicode"""

@@ -41,8 +41,8 @@ class Synchronizer:
         
         photos = self.album.get_remote_photos()
         for p in photos:
-            photo_file = self.album.get_photo(p.title.text)
-            photo_file.set_caption(p.media.description.text) # fixing captions, rewriting originals by remote versions
+            p = self.album.get_photo(p.title.text, p)
+            p.sync_caption()
 
 
 if __name__ == '__main__':
