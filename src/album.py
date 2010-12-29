@@ -6,12 +6,15 @@ Directory as album.
 
 
 from glob import glob
+import calendar
 import config
 import gdata.photos #@UnresolvedImport
 import log
 import os
 import photo
 import re
+import sys
+import time
 
 
 class Album:
@@ -55,6 +58,25 @@ class Album:
         self.remote_album = album
         return album
     
+    def __get_published_as_timestamp(self):
+        return calendar.timegm(time.strptime(self.published, '%Y-%m-%d'))
+    
+    def create_remote(self):
+        try:
+            self.get_remote()
+            log.log('warning', 'Album already exists.')
+        except Exception as e: #@UnusedVariable
+            picasa = config.Config().get('settings', 'picasa_client')
+            
+            info = self.parse_info_file()
+            title = info['title'] or self.album_id
+            
+            log.log('info', 'Creating remotely new album...')
+            self.remote_album = picasa.InsertAlbum(title=title, summary=info['summary'])
+            self.sync_info_file(True)
+            
+            log.log('ok', 'New album created remotely.')
+    
     def get_photo(self, photo_file, remote_photo=None):
         return photo.Photo(self.album_file + '/' + photo_file, remote_photo)
     
@@ -92,7 +114,7 @@ class Album:
         matches = re.compile(r'([\d\-]+)\s*(.+)').match(name)
         return { 'title': matches.group(2).strip(), 'published': matches.group(1).strip() }
     
-    def sync_info_file(self):
+    def sync_info_file(self, force_publishing_date_update=False):
         contents = self.parse_info_file()
         remote_album = self.get_remote()
         
@@ -113,10 +135,11 @@ class Album:
                 log.log('info', 'Value "%s" left without changes.' % key)
         
         # sync date
-        if not remote_album.published.text:
+        if self.published and (not remote_album.published.text or force_publishing_date_update):
             log.log('info', 'Synchronizing date of publishing.')
             remote_album.published.text = self.published
             remote_changed = True
+            # TODO fuck, this doesnt work at all
         
         if remote_changed:
             log.log('info', 'Saving info remotely.')
