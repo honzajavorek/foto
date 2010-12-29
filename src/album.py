@@ -13,7 +13,6 @@ import log
 import os
 import photo
 import re
-import sys
 import time
 
 
@@ -79,6 +78,11 @@ class Album:
     
     def get_photo(self, photo_file, remote_photo=None):
         return photo.Photo(self.album_file + '/' + photo_file, remote_photo)
+    
+    def create_remote_photo(self, file):
+        p = self.get_photo(os.path.basename(file))
+        p.create_remote(self.get_remote().gphoto_id.text)
+        return p
     
     def get_remote_photos(self):
         picasa = config.Config().get('settings', 'picasa_client')

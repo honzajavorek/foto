@@ -34,15 +34,7 @@ class Uploader:
     def run(self):
         self.album.create_remote()
         for p in self.album.get_photos():
-            p = self.album.get_photo(p)
-            print p.get_basename()
-        
-        # vezme fotky co jsou v albu a udela nejakou tmp slozku, kam je nakopiruje
-        # v tmp slozce vsem predela popisky z headline do caption-abstract
-        # v tmp slozce vsechny predela imagemagickem na mensi (fit to 480×640) ... convert dragon.gif    -resize 64x64\>  shrink_dragon.gif
-        # vsechno musi mit stejny nazev jak melo, uploadne na net
-        # smaze tmp
-
+            self.album.create_remote_photo(p)
 
 if __name__ == '__main__':
     pass

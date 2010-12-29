@@ -5,6 +5,7 @@ Elk, my personal photo manager.
 """
 
 
+from glob import glob
 import config
 import getopt
 import log
@@ -37,6 +38,14 @@ class Controller:
         elif action == 'sync':
             s = sync.Synchronizer(arg)
             s.run()
+        elif action == 'clear':
+            count = 0
+            for pattern in config.Config().get('settings', 'temporary').split(';'):
+                log.log('info', 'Clearing all %s files.' % pattern)
+                for f in glob(os.path.join(config.Config().get('application', 'workingDirectory'), pattern)):
+                    os.remove(f)
+                    count += 1
+            log.log('ok', 'Cleared %d files.' % count)
         sys.exit(0)
     
     def __wrap_safe_mode(self, action, arg=None):
@@ -44,7 +53,6 @@ class Controller:
             try:
                 self.__run(action, arg)
             except Exception as e:
-                import log
                 log.log('error', '[%s] %s' % (e.__class__.__name__, e))
                 sys.exit(1)
         else:
@@ -52,7 +60,7 @@ class Controller:
     
     def __parse_args(self, argv):
         try:
-            opts, args = getopt.getopt(argv, 'huds', ['help', 'upload', 'debug', 'sync=']) #@UnusedVariable
+            opts, args = getopt.getopt(argv, 'hudsc', ['help', 'upload', 'debug', 'sync=', 'clear', 'clean']) #@UnusedVariable
             cfg = config.Config()
             
             for opt, arg in opts:
@@ -68,6 +76,9 @@ class Controller:
                 elif opt in ('-s', '--sync'):
                     log.log('info', 'Starting synchronization.')
                     self.__wrap_safe_mode('sync', arg)
+                elif opt in ('-c', '--clear', '--clean'):
+                    log.log('warning', 'Clearing all temporary files!')
+                    self.__wrap_safe_mode('clear', arg)
                     
             self.__usage()
             sys.exit(0)
@@ -88,6 +99,7 @@ Usage:
     -u, --upload            uploads current directory to Picasa
     -s, --sync=albumID      synchronizes current directory with Picasa
                             (albumID: name or hash, current dir name taken as default)
+    -c, --clear             clears all temporary *_original and *_uploaded files in current directory
 '''
 
 if __name__ == '__main__':

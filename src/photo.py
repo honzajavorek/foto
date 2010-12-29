@@ -5,11 +5,15 @@ Photo file.
 """
 
 
+import album
 import config
+import errno
 import gdata.media #@UnresolvedImport
 import log
 import os
 import re
+import shutil
+import stat
 import subprocess
 
 
@@ -17,6 +21,8 @@ class Photo:
 
     photo_file = None
     remote_photo = None
+    
+    remote_upload_attempts = 0
 
     def __init__(self, photo_file, remote_photo=None):
         self.photo_file = photo_file
@@ -24,6 +30,58 @@ class Photo:
 
     def get_basename(self):
         return os.path.basename(self.photo_file)
+    
+    def get_remote(self, album_id):
+        if not self.remote_photo:
+            remote = None
+            a = album.Album(os.path.dirname(self.photo_file), album_id)
+            photos = a.get_remote_photos()
+            for p in photos:
+                if self.__to_unicode(p.title.text) == self.__to_unicode(self.get_basename()):
+                    remote = p
+                    break
+            self.remote_photo = remote
+        return self.remote_photo
+    
+    def create_remote(self, album_id): # album.gphoto_id.text
+        if self.remote_photo:
+            log.log('warning', 'Remote photo already exists.')
+        else:
+            log.log('ok', 'Uploading %s...' % self.get_basename())
+            log.log('info', 'Preparing temporary copy...')
+            
+            tmp_photo = self.photo_file + '_uploaded'
+            shutil.copyfile(self.photo_file, tmp_photo)
+            
+            scale = config.Config().get('settings', 'scale')
+            log.log('info', 'Resizing temporary copy to %s...' % scale)
+            subprocess.Popen(('convert', tmp_photo, '-resize', '%s>' % scale, tmp_photo), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            os.chmod(tmp_photo, stat.S_IREAD|stat.S_IWRITE|stat.S_IRGRP|stat.S_IROTH);
+            
+            #print album_url
+            #print self.get_basename()
+            #print self.get_caption()
+            #print tmp_photo
+            
+            log.log('info', 'Creating remote photo...')
+            self.remote_upload_attempts = 0
+            self.__insert_remote(album_id, tmp_photo)
+            log.log('ok', 'Remote photo created.')
+    
+    def __insert_remote(self, album_id, tmp_photo):
+        picasa = config.Config().get('settings', 'picasa_client')
+        try:
+            album_url = '/data/feed/api/user/default/albumid/%s' % album_id
+            self.remote_photo = picasa.InsertPhotoSimple(album_url, self.get_basename(), '' + self.get_caption(), tmp_photo, content_type='image/jpeg')
+        except gdata.photos.service.GooglePhotosException as e:
+            self.remote_upload_attempts += 1
+            if self.remote_upload_attempts < 10:
+                log.log('warning', 'Failed. Attempt No. %d.' % (self.remote_upload_attempts + 1))
+                log.log('info', 'Deleting corrupted remote photo...')
+                picasa.Delete(self.get_remote(album_id))
+                self.__insert_remote(album_id, tmp_photo)
+            else:
+                raise e
     
     def set_caption(self, caption):
         log.log('ok', 'Setting caption to %s file.' % self.get_basename())
