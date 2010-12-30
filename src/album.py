@@ -36,7 +36,7 @@ class Album:
         else:
             self.album_id = album_id
             
-        self.info_file = self.album_file + '/' + config.Config().get('settings', 'info_file')
+        self.info_file = os.path.join(self.album_file, config.Config().get('settings', 'info_file'))
 
     def get_remote(self):
         if (self.remote_album):
@@ -64,20 +64,23 @@ class Album:
         try:
             self.get_remote()
             log.log('warning', 'Album already exists.')
+            self.sync_info_file(True)
+            
         except Exception as e: #@UnusedVariable
             picasa = config.Config().get('settings', 'picasa_client')
             
             info = self.parse_info_file()
             title = info['title'] or self.album_id
+            timestamp = self.__get_published_as_timestamp()
             
             log.log('info', 'Creating remotely new album...')
-            self.remote_album = picasa.InsertAlbum(title=title, summary=info['summary'])
+            self.remote_album = picasa.InsertAlbum(title=title, summary=info['summary'], timestamp=str(timestamp))
             self.sync_info_file(True)
             
             log.log('ok', 'New album created remotely.')
     
     def get_photo(self, photo_file, remote_photo=None):
-        return photo.Photo(self.album_file + '/' + photo_file, remote_photo)
+        return photo.Photo(os.path.join(self.album_file, photo_file), remote_photo)
     
     def create_remote_photo(self, file):
         p = self.get_photo(os.path.basename(file))
@@ -91,7 +94,9 @@ class Album:
         return photos.entry
         
     def get_photos(self):
-        return glob(os.path.join(self.album_file, '*.[jJ][pP][gG]'))
+        items = glob(os.path.join(self.album_file, '*.[jJ][pP][gG]'))
+        items.sort()
+        return items
 
     def info_file_exists(self):
         return os.path.exists(self.info_file)
@@ -109,7 +114,7 @@ class Album:
     def parse_info_file(self):
         log.log('info', 'Parsing info file.')
         contents = file(self.info_file).read()
-        matches = re.compile(r'([^\n]+)\n(\((.+)\)\n)?(\n([^\n]+))?\s*', re.MULTILINE|re.DOTALL).match(contents)
+        matches = re.compile(r'([^\n]+)\n(\(([^\)]+)\)\n)?(\n([^\n]+))?\s*', re.MULTILINE|re.DOTALL).match(contents)
         return { 'title': matches.group(1), 'location': matches.group(3), 'summary': matches.group(5) }
         
     def parse_album_name(self):
@@ -119,36 +124,39 @@ class Album:
         return { 'title': matches.group(2).strip(), 'published': matches.group(1).strip() }
     
     def sync_info_file(self, force_publishing_date_update=False):
+        if not self.info_file_exists():
+            self.create_info_file()
+            
         contents = self.parse_info_file()
-        remote_album = self.get_remote()
+        self.remote_album = self.get_remote()
         
         log.log('info', 'Synchronizing info file values.')
         remote_changed = False
         local_changed = False
         # if local value does not exist in remote album, update this attribute in remote album (and vv)
         for key in contents.iterkeys():
-            if (not remote_album.__dict__[key].text) and contents[key]:
+            if (not self.remote_album.__dict__[key].text) and contents[key]:
                 log.log('info', 'Value "%s" updated remotely.' % key)
-                remote_album.__dict__[key].text = contents[key]
+                self.remote_album.__dict__[key].text = contents[key]
                 remote_changed = True
-            elif (not contents[key]) and remote_album.__dict__[key].text:
+            elif (not contents[key]) and self.remote_album.__dict__[key].text:
                 log.log('info', 'Value "%s" updated locally.' % key)
-                contents[key] = remote_album.__dict__[key].text
+                contents[key] = self.remote_album.__dict__[key].text
                 local_changed = True
             else:
                 log.log('info', 'Value "%s" left without changes.' % key)
         
         # sync date
-        if self.published and (not remote_album.published.text or force_publishing_date_update):
+        if self.published and (not self.remote_album.published.text or force_publishing_date_update):
             log.log('info', 'Synchronizing date of publishing.')
-            remote_album.published.text = self.published
+            self.remote_album.timestamp.text = str(self.__get_published_as_timestamp())
+            self.remote_album.published.text = self.published + 'T04:01:01.000Z'
             remote_changed = True
-            # TODO fuck, this doesnt work at all
         
         if remote_changed:
             log.log('info', 'Saving info remotely.')
             picasa = config.Config().get('settings', 'picasa_client')
-            self.remote_album = picasa.Put(remote_album, remote_album.GetEditLink().href, converter=gdata.photos.AlbumEntryFromString)
+            self.remote_album = picasa.Put(self.remote_album, self.remote_album.GetEditLink().href, converter=gdata.photos.AlbumEntryFromString)
 
         if local_changed:
             self.create_info_file()

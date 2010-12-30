@@ -7,7 +7,6 @@ Photo file.
 
 import album
 import config
-import errno
 import gdata.media #@UnresolvedImport
 import log
 import os
@@ -44,7 +43,7 @@ class Photo:
         return self.remote_photo
     
     def create_remote(self, album_id): # album.gphoto_id.text
-        if self.remote_photo:
+        if self.remote_photo or self.get_remote(album_id):
             log.log('warning', 'Remote photo already exists.')
         else:
             log.log('ok', 'Uploading %s...' % self.get_basename())
@@ -99,19 +98,28 @@ class Photo:
         picasa = config.Config().get('settings', 'picasa_client')
         self.remote_photo = picasa.UpdatePhotoMetadata(self.remote_photo)
     
+    def __get_exiftool_tag(self, tag):
+        try:
+            p = subprocess.Popen(('exiftool', self.photo_file, '-charset', 'iptc=UTF8', '-%s' % tag), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            output = self.__to_unicode(p.communicate()[0])
+        except UnicodeDecodeError as e: #@UnusedVariable
+            p = subprocess.Popen(('exiftool', self.photo_file, '-%s' % tag), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            output = self.__to_unicode(p.communicate()[0])
+        return output
+    
     def get_caption(self):
-        p = subprocess.Popen(('exiftool', self.photo_file, '-charset', 'iptc=UTF8', '-Headline'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.communicate()[0]
-        
+        output = self.__get_exiftool_tag('Headline')
         if re.match('Warning', output):
             headline = ''
         else:
-            headline = self.__recode(re.sub(r'\s*$', '', re.sub(r'^[^:]+:\s*', '', output)), 'utf-8').strip('"')
+            headline = re.sub(r'^[^:]+:\s*', '', output).strip().strip('"')
         
         if not headline:
-            p = subprocess.Popen(('exiftool', self.photo_file, '-charset', 'iptc=UTF8', '-Caption-Abstract'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            output = p.communicate()[0]
-            caption = self.__recode(re.sub(r'\s*$', '', re.sub(r'^[^:]+:\s*', '', output)), 'utf-8').strip('"')
+            output = self.__get_exiftool_tag('Caption-Abstract')
+            if re.match('Warning', output):
+                caption = ''
+            else:
+                caption = re.sub(r'^[^:]+:\s*', '', output).strip().strip('"')
             
             if caption:
                 log.log('warning', 'Caption is not placed correctly in tags! Starting autocorrection...')

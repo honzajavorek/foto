@@ -6,6 +6,7 @@ Elk, my personal photo manager.
 
 
 from glob import glob
+import album
 import config
 import getopt
 import log
@@ -46,6 +47,19 @@ class Controller:
                     os.remove(f)
                     count += 1
             log.log('ok', 'Cleared %d files.' % count)
+        elif action == 'list':
+            album_file = config.Config().get('application', 'workingDirectory')
+            a = album.Album(album_file)
+            for p in a.get_photos():
+                p = a.get_photo(p)
+                print '%s\t%s' % (p.get_basename(), p.get_caption())
+        elif action == 'wipe':
+            album_file = config.Config().get('application', 'workingDirectory')
+            a = album.Album(album_file)
+            for p in a.get_photos():
+                p = a.get_photo(p)
+                p.set_caption('')
+                log.log('ok', '%s\twiped' % p.get_basename())
         sys.exit(0)
     
     def __wrap_safe_mode(self, action, arg=None):
@@ -60,7 +74,7 @@ class Controller:
     
     def __parse_args(self, argv):
         try:
-            opts, args = getopt.getopt(argv, 'hudsc', ['help', 'upload', 'debug', 'sync=', 'clear', 'clean']) #@UnusedVariable
+            opts, args = getopt.getopt(argv, 'hudsclw', ['help', 'upload', 'debug', 'sync=', 'clear', 'clean', 'list', 'wipe']) #@UnusedVariable
             cfg = config.Config()
             
             for opt, arg in opts:
@@ -79,6 +93,12 @@ class Controller:
                 elif opt in ('-c', '--clear', '--clean'):
                     log.log('warning', 'Clearing all temporary files!')
                     self.__wrap_safe_mode('clear', arg)
+                elif opt in ('-l', '--list'):
+                    log.log('info', 'Listing captions...')
+                    self.__wrap_safe_mode('list', arg)
+                elif opt in ('-w', '--wipe'):
+                    log.log('warning', 'Wiping all captions!')
+                    self.__wrap_safe_mode('wipe', arg)
                     
             self.__usage()
             sys.exit(0)
@@ -100,6 +120,7 @@ Usage:
     -s, --sync=albumID      synchronizes current directory with Picasa
                             (albumID: name or hash, current dir name taken as default)
     -c, --clear             clears all temporary *_original and *_uploaded files in current directory
+    -l, --list              list all captions
 '''
 
 if __name__ == '__main__':

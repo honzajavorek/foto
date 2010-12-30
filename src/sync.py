@@ -12,7 +12,6 @@ import gdata.photos.service #@UnresolvedImport
 import log
 
 
-
 class Synchronizer:
 
     album = None
