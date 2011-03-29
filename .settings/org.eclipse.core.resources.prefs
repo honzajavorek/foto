@@ -1,9 +1,8 @@
-#Tue Dec 28 13:02:55 CET 2010
+#Wed Mar 30 00:12:53 CEST 2011
 eclipse.preferences.version=1
-encoding//src/album.py=utf-8
-encoding//src/config.py=utf-8
+encoding//src/Config.py=utf-8
+encoding//src/Controller.py=utf-8
+encoding//src/album/Directory.py=utf-8
+encoding//src/elk.py=utf-8
+encoding//src/image/File.py=utf-8
 encoding//src/log.py=utf-8
-encoding//src/main.py=utf-8
-encoding//src/photo.py=utf-8
-encoding//src/sync.py=utf-8
-encoding//src/upload.py=utf-8

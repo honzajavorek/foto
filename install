@@ -11,16 +11,16 @@ else
   echo "OK"
 fi
 
-echo "Checking presence of GData..."
-check=`dpkg -l | grep -i -e "^ii[ \t][ \t]*python-gdata[ \t][ \t]*"`
-if [ -z "$check" ]; then
-  echo "Please, install Python GData library in order to use this program:"
-  echo "sudo apt-get install python-gdata"
-  sudo apt-get install python-gdata
-  if [ $? -ne 0 ]; then echo 'FAIL'; fi
-else
-  echo "OK"
-fi
+#echo "Checking presence of GData..."
+#check=`dpkg -l | grep -i -e "^ii[ \t][ \t]*python-gdata[ \t][ \t]*"`
+#if [ -z "$check" ]; then
+#  echo "Please, install Python GData library in order to use this program:"
+#  echo "sudo apt-get install python-gdata"
+#  sudo apt-get install python-gdata
+#  if [ $? -ne 0 ]; then echo 'FAIL'; fi
+#else
+#  echo "OK"
+#fi
 
 echo "Checking presence of ExifTool..."
 check=`dpkg -l | grep -i -e "^ii[ \t][ \t]*libimage-exiftool-perl[ \t][ \t]*"`

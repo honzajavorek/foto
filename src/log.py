@@ -1,12 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-'''
-Application view (utils).
-'''
-
-import config
 import os
 import sys
+from Config import Config
 
 
 
@@ -43,7 +39,9 @@ __COLORS = dict(
     )
 
 __RESET = '\033[0m'
-    
+
+
+
 def __colored(text=None, color=None, on_color=None, bold=None):
     if os.getenv('ANSI_COLORS_DISABLED') is None:
         format_string = '\033[%dm%s'
@@ -58,23 +56,51 @@ def __colored(text=None, color=None, on_color=None, bold=None):
     text += __RESET
     return text
 
-def log(level, message):
+
+
+def __log(level, message):
     level = level.lower()
-    if level in ('system', 'error') or config.Config().getboolean('log', level):
+    if level == 'error' or Config().getboolean('log', level) or Config().getboolean('application', 'debug'):
+        
         format_string = '[%s]'
         level = level.upper()
+        
         if level == 'ERROR':
             text = __colored(format_string % level, 'red')
         elif level == 'WARNING':
             text = __colored(format_string % level, 'yellow')
         elif level == 'INFO':
             text = __colored(format_string % level, 'blue')
-        elif level == 'SYSTEM':
-            text = __colored(format_string % level, 'grey')
         elif level == 'OK':
             text = __colored(format_string % level, 'green')
         else:
             text = format_string % level
-        text += (': ' + message.encode(sys.stdin.encoding))
+        
+        if sys.stdin.encoding:
+            text += (': ' + message.encode(sys.stdin.encoding))
+        else:
+            text += (': ' + message)
+        
         print >> sys.stderr, text
+
+
+
+def error(message):
+    __log('error', message)
+
+
+
+def warning(message):
+    __log('warning', message)
+    
+    
+    
+def info(message):
+    __log('info', message)
+
+
+
+def ok(message):
+    __log('ok', message)
+
 
