@@ -9,7 +9,7 @@ class Config:
 
 
 
-    CONFIG_FILE = "../application/config.ini"
+    CONFIG_FILE = "./application/config.ini"
     __instance = None
 
 
