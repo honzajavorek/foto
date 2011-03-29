@@ -64,12 +64,12 @@ class Controller(object):
     
     
     def upload(self):
-        raise NotImplementedError()
+        self.dir.upload()
     
     
     
     def sync(self):
-        raise NotImplementedError()
+        self.dir.sync()
     
     
     

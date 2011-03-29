@@ -3,6 +3,7 @@
 import os
 from tools.ExifTool import ExifTool
 import log
+import re
 
 
 
@@ -25,6 +26,13 @@ class File(object):
     
     
     
+    def get_date(self):
+        datetime = ExifTool(self.path).get_tag('DateTimeOriginal')
+        matches = re.match(r'(\d{4})\W(\d{2})\W(\d{2})', datetime)
+        return '%s-%s-%s' % (matches.group(1), matches.group(2), matches.group(3))
+        
+        
+        
     def get_caption(self):
         """Provides caption of the file. In case of incorrect tags autocorrection takes place."""
         
