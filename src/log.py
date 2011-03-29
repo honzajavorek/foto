@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-from Config import Config
+from tools.Config import Config
 
 
 

@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import getopt
-from Config import Config
+from tools.Config import Config
 import log
 import sys
-from album.Directory import Directory
+from filesystem.Directory import Directory
 
 
 
@@ -15,6 +15,8 @@ class Controller(object):
 
     def __init__(self, args):
         """Parses arguments and launches action."""
+        
+        self.dir = Directory(Config().get('application', 'workingDirectory'))
         
         action = self.__parse_args(args)
         action()
@@ -72,14 +74,13 @@ class Controller(object):
     
     
     def list(self):
-        dir = Directory(Config().get('application', 'workingDirectory'))
-        for file in dir.get_files():
+        for file in self.dir.get_files():
             print '%s\t%s' % (file.get_name(), file.get_caption())
     
     
     
     def wipe(self):
-        raise NotImplementedError()
+        self.dir.wipe_captions()
     
     
     
@@ -100,6 +101,10 @@ Usage:
     -d, --debug             debug mode
 '''
         sys.exit(1)
-        
-        
-            
+
+
+
+if __name__ == '__main__':
+    pass
+
+

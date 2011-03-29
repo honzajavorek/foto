@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Elk, my personal photo manager."""
-from Controller import Controller
+from application.Controller import Controller
 import sys
 import os
-from Config import Config
+from tools.Config import Config
 
 
 
