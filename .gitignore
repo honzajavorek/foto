@@ -1,2 +1,4 @@
 *.pyc
-/deprecated
+.settings
+.project
+.pydevproject

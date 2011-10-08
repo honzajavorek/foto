@@ -1,26 +1,17 @@
 #!/bin/bash
 
-echo "Checking presence of Python..."
-check=`dpkg -l | grep -i -e "^ii[ \t][ \t]*python[ \t][ \t]*"`
+
+echo "Checking presence of gdata..."
+check=`pip freeze | grep -i -e "^gdata"`
 if [ -z "$check" ]; then
-  echo "Please, install Python in order to use this program:"
-  echo "sudo apt-get install python"
-  sudo apt-get install python
+  echo "Please, install gdata Python package in order to use this program:"
+  echo "pip install gdata --upgrade"
+  sudo pip install gdata --upgrade
   if [ $? -ne 0 ]; then echo 'FAIL'; fi
 else
   echo "OK"
 fi
 
-#echo "Checking presence of GData..."
-#check=`dpkg -l | grep -i -e "^ii[ \t][ \t]*python-gdata[ \t][ \t]*"`
-#if [ -z "$check" ]; then
-#  echo "Please, install Python GData library in order to use this program:"
-#  echo "sudo apt-get install python-gdata"
-#  sudo apt-get install python-gdata
-#  if [ $? -ne 0 ]; then echo 'FAIL'; fi
-#else
-#  echo "OK"
-#fi
 
 echo "Checking presence of ExifTool..."
 check=`dpkg -l | grep -i -e "^ii[ \t][ \t]*libimage-exiftool-perl[ \t][ \t]*"`
@@ -39,6 +30,17 @@ if [ -z "$check" ]; then
   echo "Please, install ImageMagick in order to use this program:"
   echo "sudo apt-get install imagemagick"
   sudo apt-get install imagemagick
+  if [ $? -ne 0 ]; then echo 'FAIL'; fi
+else
+  echo "OK"
+fi
+
+echo "Checking presence of ffmpeg..."
+check=`dpkg -l | grep -i -e "^ii[ \t][ \t]*ffmpeg[ \t][ \t]*"`
+if [ -z "$check" ]; then
+  echo "Please, install ffmpeg and necessary codecs in order to use this program:"
+  echo "sudo apt-get install ffmpeg libx264-98 libx264-dev x264"
+  sudo apt-get install ffmpeg libx264-98 libx264-dev x264
   if [ $? -ne 0 ]; then echo 'FAIL'; fi
 else
   echo "OK"
