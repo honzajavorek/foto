@@ -8,11 +8,9 @@ import os
 
 class ExifTool(object):
     """ExifTool python wrapper."""
-    
-    
+
     def __init__(self, file):
         self.file = file
-    
     
     def get_tag(self, tag):
         try:
@@ -32,14 +30,12 @@ class ExifTool(object):
         tag = re.sub(r'^[^:]+:\s*', '', output).strip().strip('"')
         return tag
     
-    
     def set_tag(self, tag, content):
         subprocess.Popen(('exiftool', self.file, '-charset', 'iptc=UTF8', '-%s="%s"' % (tag, content)), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
         
         tmp_file = '%s_original' % self.file
         if os.path.isfile(tmp_file):
             os.unlink(tmp_file)
-    
     
     def _to_unicode(self, object, encoding='utf-8'):
         """Recodes string to Unicode."""

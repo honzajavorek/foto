@@ -22,7 +22,7 @@ class Controller(object):
             for action in actions:
                 action()
         except Exception as e:
-            if Config().get('application', 'debug'):
+            if Config().getboolean('application', 'debug'):
                 raise
             log.error('Error (%s).' % str(e))
         
@@ -30,34 +30,40 @@ class Controller(object):
     def _parse_args(self, args):
         """Parses arguments and returns what action to launch."""
         try:
-            opts = getopt.getopt(args, 'uslwvq', ['upload', 'sync', 'list', 'wipe', 'video', 'quiet'])[0]
+            opts = getopt.getopt(args, 'auslwvq', ['all', 'upload', 'sync', 'list', 'wipe', 'video', 'quiet'])[0]
+            actions = []
             
             for opt, _ in opts:
                 if opt in ('-q', '--quiet'):
-                    log.info('Quiet mode.')
                     Config().set('application', 'quiet', str(True))
-            
-            actions = []
-            for opt, _ in opts:
-                if opt in ('-u', '--upload'):
-                    log.info('Starting upload of current directory.')
+                    
+                if opt in ('-a', '--all'):
+                    log.info('All actions.')
                     actions.append(self.upload)
-                    
-                elif opt in ('-s', '--sync'):
-                    log.info('Starting synchronization of captions and info.')
                     actions.append(self.sync)
-                    
-                elif opt in ('-l', '--list'):
-                    log.info('Listing all captions in current directory.')
-                    actions.append(self.list)
-                    
-                elif opt in ('-v', '--video'):
-                    log.info('Converting videos from MOV to AVI in current directory.')
                     actions.append(self.video)
                     
-                elif opt in ('-w', '--wipe'):
-                    log.info('Wiping all captions in current directory.')
-                    actions.append(self.wipe)
+            if not actions:
+                for opt, _ in opts:
+                    if opt in ('-u', '--upload'):
+                        log.info('Starting upload of current directory.')
+                        actions.append(self.upload)
+                        
+                    elif opt in ('-s', '--sync'):
+                        log.info('Starting synchronization of captions and info.')
+                        actions.append(self.sync)
+                        
+                    elif opt in ('-l', '--list'):
+                        log.info('Listing all captions in current directory.')
+                        actions.append(self.list)
+                        
+                    elif opt in ('-v', '--video'):
+                        log.info('Converting videos from MOV to AVI in current directory.')
+                        actions.append(self.video)
+                        
+                    elif opt in ('-w', '--wipe'):
+                        log.info('Wiping all captions in current directory.')
+                        actions.append(self.wipe)
         
         except getopt.GetoptError:
             log.info('Bad arguments.')
