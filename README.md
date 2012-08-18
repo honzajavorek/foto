@@ -20,6 +20,6 @@ Because it is a lovely short word. Short enough to be typed often into my Xubunt
 ## License: ISC
 
 © 2010-2012 Jan Javorek &lt;<a
-href="mailto:jan.javorek&#64;gmail.com">jan.javorek&#64;<!---->gmail.com</a>&gt;
+href="mailto:jan.javorek&#64;gmail.com">jan.javorek&#64;gmail.com</a>&gt;
 
 This work is licensed under [ISC license](https://en.wikipedia.org/wiki/ISC_license).
