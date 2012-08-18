@@ -76,7 +76,7 @@ class Directory(object):
             self.set_info(album.title.text, album.location.text, album.summary.text)
             
     def set_info(self, title, location, summary):
-        if len(summary) > 1000:
+        if summary and len(summary) > 1000:
             raise ValueError('Description has %d characters, has to be up to 1000.' % len(summary))
         contents = '%s\n(%s)\n\n%s\n' % (title, location, summary)
         with open(self.info_file, 'w') as f:
@@ -111,6 +111,8 @@ class Directory(object):
         if not date:
             for f in self.get_files():
                 date = f.get_date()
+                if date:
+                    return date
         return date
     
     def get_album(self):
@@ -127,7 +129,7 @@ class Directory(object):
         if album:
             log.info("Album exists remotely.")
         else:
-            log.error("Album doesn't exist remotely, creating a new one.") # TODO create
+            log.error("Album doesn't exist remotely, creating a new one.")
             album = self.api.create_album(self.parse_name()[1])
     
         # create/sync info file
@@ -185,19 +187,24 @@ class Directory(object):
         # checking captions of remote photos and synchronizing them
         log.info("Synchronizing captions.")
         for photo in self.api.get_photos(album):
-            file = File(os.path.join(self.path, FileName(Text(photo.title))))
-            
-            local_caption = file.caption
-            remote_caption = Text(photo.media.description)
-            
-            if not local_caption and remote_caption:
-                file.caption = remote_caption
-                log.info(('%s   <==   Picasa   %s' % (file.name, remote_caption))[0:70])
-            elif local_caption and not remote_caption:
-                self.api.set_caption(photo, local_caption)
-                log.info(('%s   ==>   Picasa   %s' % (file.name, local_caption))[0:70])
-            else:
-                log.info(('%s    ?    Picasa   %s - %s' % (file.name, local_caption, remote_caption))[0:70])
+            name = Text(photo.title)
+            try:
+                file = File(os.path.join(self.path, name))
+                
+                if file.is_photo:
+                    local_caption = file.caption
+                    remote_caption = Text(photo.media.description)
+                    
+                    if not local_caption and remote_caption:
+                        file.caption = remote_caption
+                        log.info(('%s   <==   Picasa   %s' % (file.name, remote_caption))[0:70])
+                    elif local_caption and not remote_caption:
+                        self.api.set_caption(photo, local_caption)
+                        log.info(('%s   ==>   Picasa   %s' % (file.name, local_caption))[0:70])
+                    else:
+                        log.info(('%s    ?    Picasa   %s - %s' % (file.name, local_caption, remote_caption))[0:70])
+            except IOError:
+                log.warning('%s is missing' % name)
         
         # finished
         log.info("Done.")

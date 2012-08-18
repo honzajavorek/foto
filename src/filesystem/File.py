@@ -25,7 +25,7 @@ class File(object):
     
     def __init__(self, path):
         self.path = self._normalize(path)
-        self.name = FileName(os.path.basename(self.path))
+        self.name = os.path.basename(self.path)
         self.extension = os.path.splitext(self.name)[1].strip('.')
         
         self.is_photo = self.extension in File.PHOTO_FORMATS
@@ -35,13 +35,13 @@ class File(object):
         name, ext = os.path.splitext(path)
         with_lower_ext = name + ext.lower()
         with_upper_ext = name + ext.upper()
-        
-        if os.path.isfile(with_upper_ext):
-            log.warning('File extension is uppercase! Performing autocorrection.')
-            os.rename(path, with_lower_ext)
+
+        if os.path.isfile(with_upper_ext) and not os.path.isfile(with_lower_ext):
+            log.warning('%s         %s   ==>   %s' % (os.path.basename(name), ext.upper(), ext.lower()))
+            os.rename(with_upper_ext, with_lower_ext)
             
         if not os.path.isfile(with_lower_ext):
-            raise IOError('File %s does not exist.' % with_lower_ext)
+            raise IOError('File does not exist.')
             
         return with_lower_ext
     
@@ -52,6 +52,10 @@ class File(object):
         if not self.is_photo:
             raise NotImplementedError()
         datetime = ExifTool(self.path).get_tag('DateTimeOriginal')
+        if not datetime:
+            datetime = ExifTool(self.path).get_tag('CreateDate')
+        if not datetime:
+            return None
         matches = re.match(r'(\d{4})\W(\d{2})\W(\d{2})', datetime)
         return '%s-%s-%s' % (matches.group(1), matches.group(2), matches.group(3))
     
@@ -71,7 +75,7 @@ class File(object):
         if not headline:
             caption = et.get_tag('Caption-Abstract')
             if caption:
-                log.warning('Caption is not placed correctly in tags! Performing autocorrection.')
+                log.warning('%s         Caption-Abstract   ==>   Headline' % self.name)
                 self.caption = caption
             return caption
         
