@@ -1,0 +1,6 @@
+libimage-exiftool-perl
+imagemagick
+ffmpeg
+libx264-120
+libx264-dev
+x264

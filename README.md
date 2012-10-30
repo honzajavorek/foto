@@ -1,7 +1,7 @@
 
 # Elk
 
-My personal photo manager. I started to hate Picasa, because it was pretending to be smarter than me. I like file-system based management and I couldn't find a folder-based manager which could simply synchronize photos with Picasa Web Albums and save properly metadata into JPEG files.
+Elk is **my personal** photo manager. I started to hate Picasa, because it was pretending to be smarter than me. I like file-system based management and I couldn't find a folder-based manager which could simply synchronize photos with Picasa Web Albums and save properly metadata into JPEG files.
 
 ## Status: HOBBY PROJECT
 
@@ -9,9 +9,11 @@ This my hobby project is under bit-by-bit development. No rush. No other people 
 
 ## Installation
 
-Try to just run `install` script from your terminal. Elk depends on some external tools, such as `ExifTool`, `ImageMagick`, `ffmpeg`, etc.
+Only *buntu box is supported.
 
-<small>Near future: `python setup.py install` ([issue #1](https://github.com/honzajavorek/elk/issues/1))</small>
+`pip install https://github.com/honzajavorek/elk.git#egg=elk`
+
+Read carefully what the installation says to you as there are some additional dependencies on other *buntu packages.
 
 ## Why Elk?
 
