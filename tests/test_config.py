@@ -10,6 +10,10 @@ from elk import config
 from .utils import TestCase
 
 
+class Config(config.Config):
+    pass
+
+
 class ConfigTest(TestCase):
 
     default_basename = 'default.cfg'
@@ -31,7 +35,7 @@ class ConfigTest(TestCase):
             f.write('[smurfs]\ncap_color = red')
         self.user_config = user_config
 
-        config_cls = config.Config
+        config_cls = Config
         config_cls.filename = default_config
         self.config_cls = config_cls
 

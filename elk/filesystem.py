@@ -29,6 +29,9 @@ class File(object):
 
 class FileEditor(object):
 
+    def __init__(self, config=None):
+        self.config = config or {}
+
     def lowercase_ext(self, file):
         name, ext = os.path.splitext(file.filename)
         if ext.lower() == ext:

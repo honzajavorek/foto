@@ -38,3 +38,8 @@ class PhotoTestCase(FileTestCase):
     bytes = 3419633
     datetime = datetime.datetime(2011, 11, 11, 16, 27, 25)
     size = (3072, 2304)
+
+
+class VideoTestCase(FileTestCase):
+    basename = 'P1170591.MOV'
+    bytes = 2820346
