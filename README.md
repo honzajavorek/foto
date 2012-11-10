@@ -16,7 +16,7 @@ Only *buntu box is oficially supported.
 
 ## Why Elk?
 
-Because it is a lovely short word. Short enough to be typed often into my Xubuntu terminal. <small>And because I lived in Finland for half of a year and actually quite like these animals.</small>
+Because it is a lovely short word. Short enough to be typed often into my Xubuntu terminal. <small>And because I lived in Finland for half of a year and I actually quite like these animals.</small>
 
 ## License: ISC
 
