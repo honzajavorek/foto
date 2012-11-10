@@ -18,10 +18,8 @@ class TestCase(unittest.TestCase):
 
 class FileTestCase(TestCase):
 
-    basename = 'P1150648.JPG'
-    bytes = 3419633
-    datetime = datetime.datetime(2011, 11, 11, 16, 27, 25)
-    size = (3072, 2304)
+    basename = 'file.TXT'
+    bytes = 0
 
     def setUp(self):
         filename = os.path.join(os.path.dirname(__file__), self.basename)
@@ -33,3 +31,10 @@ class FileTestCase(TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
+
+
+class PhotoTestCase(FileTestCase):
+    basename = 'P1150648.JPG'
+    bytes = 3419633
+    datetime = datetime.datetime(2011, 11, 11, 16, 27, 25)
+    size = (3072, 2304)

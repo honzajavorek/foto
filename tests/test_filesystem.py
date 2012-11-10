@@ -11,7 +11,7 @@ class FileTest(FileTestCase):
     def test_exists(self):
         f = filesystem.File(self.filename)
         self.assertTrue(f.exists)
-        f = filesystem.File('.......')  # non-existing file
+        f = filesystem.File('<???>')  # non-existing file
         self.assertFalse(f.exists)
 
     def test_bytes(self):
@@ -55,6 +55,6 @@ class Directory(FileTestCase):
 
     def test_list_ext(self):
         d = filesystem.Directory(os.path.dirname(self.filename))
-        self.assertEquals(d.list('jpg'), [])
-        self.assertEquals(d.list('JPG')[0], os.path.basename(self.filename))
-        self.assertEquals(d.list('.JPG')[0], os.path.basename(self.filename))
+        self.assertEquals(d.list('txt'), [])
+        self.assertEquals(d.list('TXT')[0], os.path.basename(self.filename))
+        self.assertEquals(d.list('.TXT')[0], os.path.basename(self.filename))

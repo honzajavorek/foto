@@ -2,10 +2,10 @@
 
 
 from elk import photo
-from .utils import FileTestCase
+from .utils import PhotoTestCase
 
 
-class MetadataTest(FileTestCase):
+class MetadataTest(PhotoTestCase):
 
     def test_get_empty(self):
         metadata = photo.Metadata(self.filename)
@@ -23,7 +23,7 @@ class MetadataTest(FileTestCase):
         metadata['Caption-Abstract'] = '!!!'
         self.assertIn('Caption-Abstract', metadata)
 
-    def test_set_empty(self):
+    def test_del(self):
         metadata = photo.Metadata(self.filename)
         metadata['Headline'] = 'Ostrava'
         del metadata['Headline']
@@ -60,7 +60,7 @@ class MetadataTest(FileTestCase):
         self.assertEqual(metadata['Headline'], sample)
 
 
-class PhotoTest(FileTestCase):
+class PhotoTest(PhotoTestCase):
 
     def test_caption(self):
         p = photo.Photo(self.filename)
@@ -81,7 +81,7 @@ class PhotoTest(FileTestCase):
         self.assertEqual(p.size, self.size)
 
 
-class PhotoEditorTest(FileTestCase):
+class PhotoEditorTest(PhotoTestCase):
 
     def test_resize(self):
         pe = photo.PhotoEditor()
