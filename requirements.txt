@@ -1,3 +1,4 @@
-gdata
-sh
-docopt
+docopt==0.5.0
+gdata==2.0.17
+sh==1.05
+wand==0.2.2

@@ -1,5 +1,5 @@
 libimage-exiftool-perl
-imagemagick
+libmagickwand-dev
 ffmpeg
 libx264-120
 libx264-dev

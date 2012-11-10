@@ -9,11 +9,10 @@ This my hobby project is under bit-by-bit development. No rush. No other people 
 
 ## Installation
 
-Only *buntu box is supported.
+Only *buntu box is oficially supported.
 
-`pip install https://github.com/honzajavorek/elk.git#egg=elk`
-
-Read carefully what the installation says to you as there are some additional dependencies on other *buntu packages.
+    cat ubuntu_packages.txt | xargs apt-get -y install
+    pip install https://github.com/honzajavorek/elk.git#egg=elk
 
 ## Why Elk?
 
