@@ -76,8 +76,20 @@ class PhotoTest(FileTestCase):
         p = photo.Photo(self.filename)
         self.assertEqual(p.datetime, self.datetime)
 
+    def test_size(self):
+        p = photo.Photo(self.filename)
+        self.assertEqual(p.size, self.size)
+
 
 class PhotoEditorTest(FileTestCase):
+
+    def test_resize(self):
+        pe = photo.PhotoEditor()
+        p = photo.Photo(self.filename)
+
+        size = (30, 20)
+        p = pe.resize(p, *size)
+        self.assertEqual(size, p.size)
 
     def test_fix_caption(self):
         pe = photo.PhotoEditor()

@@ -14,7 +14,7 @@ class File(object):
         return os.path.isfile(self.filename)
 
     @property
-    def size(self):
+    def bytes(self):
         return os.path.getsize(self.filename) / 1024  # kB
 
     def open(self, *args, **kwargs):

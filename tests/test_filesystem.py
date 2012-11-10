@@ -14,9 +14,9 @@ class FileTest(FileTestCase):
         f = filesystem.File('.......')  # non-existing file
         self.assertFalse(f.exists)
 
-    def test_size(self):
+    def test_bytes(self):
         f = filesystem.File(self.filename)
-        self.assertEqual(f.size, self.size / 1024)  # kB
+        self.assertEqual(f.bytes, self.bytes / 1024)  # kB
 
     def test_open(self):
         f = filesystem.File(self.filename)

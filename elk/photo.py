@@ -4,6 +4,7 @@
 import re
 import datetime
 from sh import exiftool
+from wand.image import Image
 
 from elk.filesystem import File, FileEditor
 
@@ -95,11 +96,19 @@ class Photo(File):
                 self._datetime = datetime.datetime(*groups)
         return self._datetime
 
+    @property
+    def size(self):
+        with Image(filename=self.filename) as img:
+            return img.size
+
 
 class PhotoEditor(FileEditor):
 
-    def resize(self, photo):
-        pass
+    def resize(self, photo, width, height):
+        with Image(filename=photo.filename) as img:
+            img.resize(width, height)
+            img.save(filename=photo.filename)
+        return photo.__class__(photo.filename)
 
     def fix_caption(self, photo):
         caption = unicode(photo.caption or '')
