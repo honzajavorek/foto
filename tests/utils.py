@@ -7,7 +7,7 @@ import tempfile
 import datetime
 
 try:
-    import unittest2
+    import unittest2 as unittest
 except ImportError:
     import unittest
 
@@ -19,8 +19,9 @@ class TestCase(unittest.TestCase):
 class FileTestCase(TestCase):
 
     basename = 'P1150648.JPG'
-    size = 3419633
+    bytes = 3419633
     datetime = datetime.datetime(2011, 11, 11, 16, 27, 25)
+    size = (3072, 2304)
 
     def setUp(self):
         filename = os.path.join(os.path.dirname(__file__), self.basename)
