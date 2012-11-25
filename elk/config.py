@@ -13,12 +13,12 @@ class Config(SafeConfigParser):
     def __init__(self, *args, **kwargs):
         SafeConfigParser.__init__(self, *args, **kwargs)  # old-style class
 
-        log.debug('Default config values taken from: ' + self.filename)
+        log.debug('Default config values taken from: %s', self.filename)
         with open(self.filename) as f:
             self.readfp(f)
 
         self.filename = self.get('config', 'filename')
-        log.debug('Config file: ' + self.filename)
+        log.debug('Config file: %s', self.filename)
 
         self.remove_option('config', 'filename')
         if self.read([self.filename]):
