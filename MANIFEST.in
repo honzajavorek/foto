@@ -1,3 +1,4 @@
-recursive-include elk/* tests/*
-global-exclude *.py[co]
-include README.md requirements.txt ubuntu_packages.txt
+recursive-include elk *
+recursive-include tests *
+global-exclude *.py[co] *~
+include README* *requirements.txt ubuntu_packages.txt
