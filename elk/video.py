@@ -17,9 +17,9 @@ class VideoEditor(FileEditor):
 
     def __init__(self, config):
         if 'avocnv' not in config:
-            raise ValueError("Key 'avocnv' is missing in configuration given.")
+            raise ValueError("Key 'avocnv' is missing in config given.")
         if 'format' not in config:
-            raise ValueError("Key 'format' is missing in configuration given.")
+            raise ValueError("Key 'format' is missing in config given.")
         super(VideoEditor, self).__init__(config)
 
     def convert(self, video):

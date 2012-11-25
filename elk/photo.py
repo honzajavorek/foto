@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 
+import os
 import re
 import datetime
 from sh import exiftool
 from wand.image import Image
 
-from elk.filesystem import File, FileEditor
+from elk.filesystem import File, FileEditor, Directory, DirectoryEditor
 
 
 class Metadata(object):
@@ -121,3 +122,84 @@ class PhotoEditor(FileEditor):
 
         photo.caption = caption or None
         return photo
+
+
+class Info(object):
+
+    _parser_re = re.compile(r'([^\n]+)\n(\(([^\)]+)\)\n)?(\n([^\n]+))?\s*',
+                            re.MULTILINE | re.DOTALL)
+
+
+class Album(Directory):
+
+    _name_re = re.compile(r'(\d{4}\-\d{2}\-\d{2})?\s*(.+)')
+
+    def __init__(self, path, config):
+        super(Album, self).__init__(path)
+
+        if 'info_basename' not in config:
+            raise ValueError("Key 'info_basename' is missing "
+                             "in config given.")
+        if 'cover_basename' not in config:
+            raise ValueError("Key 'cover_basename' is missing "
+                             "in config given.")
+        self.config = config
+
+        self.info = Info(os.path.join(self.path,
+                                      config['info_basename']))
+        self._cover = File(os.path.join(self.path,
+                                        config['cover_basename']))
+        self._date, self.title = self.parse_name()
+
+    def list(self):
+        return super(Album, self).list(ext='.jpg', cls=Photo)
+
+    def parse_name(self):
+        date = None
+        title = self.name
+
+        match = self._name_re.match(self.name)
+        if match and match.group(1):
+            group = map(int, match.group(1).split('-'))
+            date = datetime.date(*group)
+            title = match.group(2)
+
+        return date, title
+
+    @property
+    def date(self):
+        if not self._date:
+            dt = datetime.datetime.now()
+            for photo in self.list():
+                if photo.datetime:
+                    dt = min(photo.datetime, dt)
+            self._date = dt.date()
+        return self._date
+
+    @property
+    def cover(self):
+        try:
+            filename = self._cover.content.strip()
+            if not filename:
+                return None
+            photo = Photo(filename)
+            if not photo.exists:
+                self._cover.content = None
+                return None
+            return photo
+        except IOError:
+            return None
+
+    @cover.setter
+    def cover(self, photo):
+        self._cover.content = photo.filename
+
+
+class AlbumEditor(DirectoryEditor):
+
+    def fix_name(self, dir):
+        date, name = dir.parse_name()
+        if not date:
+            new_name = str(dir.date) + ' ' + name
+            dir = self.rename(dir, new_name)
+        return dir

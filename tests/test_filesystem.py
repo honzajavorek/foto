@@ -43,18 +43,19 @@ class FileEditorTest(FileTestCase):
         fe = filesystem.FileEditor()
         f = fe.lowercase_ext(f)
 
-        self.assertEquals(os.path.splitext(f.filename)[1],
-                          os.path.splitext(f.filename)[1].lower())
+        ext = os.path.splitext(f.filename)[1]
+        self.assertEquals(ext, ext.lower())
 
 
 class Directory(FileTestCase):
 
     def test_list(self):
         d = filesystem.Directory(os.path.dirname(self.filename))
-        self.assertEquals(d.list()[0], os.path.basename(self.filename))
+        self.assertEquals(d.list()[0].name, os.path.basename(self.filename))
 
     def test_list_ext(self):
         d = filesystem.Directory(os.path.dirname(self.filename))
-        self.assertEquals(d.list('txt'), [])
-        self.assertEquals(d.list('TXT')[0], os.path.basename(self.filename))
-        self.assertEquals(d.list('.TXT')[0], os.path.basename(self.filename))
+        basename = os.path.basename(self.filename)
+        self.assertEquals(d.list('txt')[0].name, basename)
+        self.assertEquals(d.list('TXT')[0].name, basename)
+        self.assertEquals(d.list('.TXT')[0].name, basename)
