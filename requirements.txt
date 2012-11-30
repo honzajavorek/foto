@@ -3,3 +3,4 @@ gdata==2.0.17
 sh==1.05
 wand==0.2.2
 send2trash==1.2.0
+gevent==0.13.8

@@ -13,6 +13,7 @@ Usage:
     elk info [-d]
     elk captions [-d]
     elk wipe [info|captions] [-d]
+    elk fix [captions] [-d]
     elk -h|--help
     elk --version
 
@@ -30,6 +31,7 @@ Options:
     captions            Print all captions in current directory.
     wipe info           Wipe current directory info.
     wipe captions       Wipe all captions in current directory.
+    fix captions        Fix all captions in current directory.
     -h --help           Show this screen.
     --version           Show elk version.
     -d                  Debug mode.
@@ -82,8 +84,11 @@ def find_command(args):
 def main():
     """Handles arguments parsing and command execution."""
     args = parse_args()
-    setup_logging('-d' in args)
-    args.remove('-d')
+    debug = '-d' in args
+
+    setup_logging(debug)
+    if debug:
+        args.remove('-d')
     log.debug('Given args: %r', args)
 
     cmd_name = find_command(args)

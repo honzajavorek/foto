@@ -2,11 +2,19 @@
 
 
 import os
+import sys
+import gevent
+
+
+system_encoding = sys.getfilesystemencoding()
 
 
 class File(object):
 
     def __init__(self, filename):
+        if not isinstance(filename, unicode):
+            filename = filename.decode(system_encoding)
+
         self.filename = filename
         self.name = os.path.basename(filename)
 
@@ -32,7 +40,7 @@ class File(object):
             f.write(value or '')
 
     def __str__(self):
-        return self.filename
+        return self.filename.encode(system_encoding)
 
     def __repr__(self):
         cls = self.__class__
@@ -62,6 +70,9 @@ class FileEditor(object):
 class Directory(object):
 
     def __init__(self, path):
+        if not isinstance(path, unicode):
+            path = path.decode(system_encoding)
+
         self.path = path
         self.name = os.path.basename(path)
 
@@ -76,8 +87,21 @@ class Directory(object):
             return [cls(os.path.join(self.path, f)) for f in files]
         return files
 
+    def _map(self, func, files):
+        files = list(files)
+        results = [None] * len(files)  # pre-populate the list with None
+
+        def func_wrapper(f):
+            index = files.index(f)
+            results[index] = func(f)
+
+        jobs = [gevent.spawn_link_exception(func_wrapper, f)
+                for f in files]
+        gevent.joinall(jobs)
+        return results
+
     def __str__(self):
-        return self.path
+        return self.path.encode(system_encoding)
 
     def __repr__(self):
         cls = self.__class__

@@ -1,3 +1,4 @@
+libevent-dev
 libimage-exiftool-perl
 libmagickwand-dev
 ffmpeg

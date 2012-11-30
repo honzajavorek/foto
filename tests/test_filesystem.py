@@ -31,7 +31,8 @@ class FileTest(FileTestCase):
 
     def test_repr(self):
         f = filesystem.File(self.filename)
-        self.assertEqual('<elk.filesystem.File {0!r}>'.format(self.filename),
+        filename = unicode(self.filename)
+        self.assertEqual('<elk.filesystem.File {0!r}>'.format(filename),
                          repr(f))
 
 

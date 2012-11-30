@@ -7,6 +7,7 @@ import datetime
 from sh import exiftool
 from wand.image import Image
 
+from elk import parallel
 from elk.filesystem import File, FileEditor, Directory, DirectoryEditor
 
 
@@ -129,6 +130,10 @@ class Info(object):
     _parser_re = re.compile(r'([^\n]+)\n(\(([^\)]+)\)\n)?(\n([^\n]+))?\s*',
                             re.MULTILINE | re.DOTALL)
 
+    def __init__(self, filename):
+        self.filename = filename
+        self.name = os.path.basename(filename)
+
 
 class Album(Directory):
 
@@ -197,9 +202,9 @@ class Album(Directory):
 
 class AlbumEditor(DirectoryEditor):
 
-    def fix_name(self, dir):
-        date, name = dir.parse_name()
+    def fix_name(self, album):
+        date, name = album.parse_name()
         if not date:
-            new_name = str(dir.date) + ' ' + name
-            dir = self.rename(dir, new_name)
-        return dir
+            new_name = str(album.date) + ' ' + name
+            album = self.rename(album, new_name)
+        return album
