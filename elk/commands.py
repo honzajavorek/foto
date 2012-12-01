@@ -5,10 +5,6 @@ from elk import parallel
 from elk.photo import Album, PhotoEditor
 
 
-def wipe_captions(dir, config):
-    pass
-
-
 def captions(dir, config):
     config = dict(config.items('album'))
     album = Album(dir, config)
@@ -39,3 +35,17 @@ def fix_captions(dir, config):
     for photo, (caption, new_caption) in zip(photos, captions):
         if caption and new_caption:
             print u'{0}: {1} -> {2}'.format(photo.name, caption, new_caption)
+
+
+def wipe_captions(dir, config):
+    config = dict(config.items('album'))
+    album = Album(dir, config)
+
+    def clear_caption(photo):
+        photo.caption = None
+
+    photos = album.list()
+    parallel.map(clear_caption, photos)
+
+    for photo in photos:
+        print u'{0}:  - '.format(photo.name)
