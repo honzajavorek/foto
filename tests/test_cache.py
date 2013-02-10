@@ -4,7 +4,7 @@
 import os
 
 from elk import cache
-from .utils import FileTestCase
+from .base import FileTestCase
 
 
 class CacheTest(FileTestCase):

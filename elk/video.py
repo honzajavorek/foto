@@ -10,19 +10,22 @@ from elk.filesystem import File, FileEditor
 
 
 class Video(File):
+    """Video abstraction object based on :class:`~elk.filesystem.File`."""
     pass
 
 
 class VideoEditor(FileEditor):
+    """Manipulates :class:`Video` objects."""
 
     def __init__(self, config):
-        if 'avocnv' not in config:
-            raise ValueError("Key 'avocnv' is missing in config given.")
-        if 'format' not in config:
-            raise ValueError("Key 'format' is missing in config given.")
+        assert 'avocnv' in config
+        assert 'format' in config
         super(VideoEditor, self).__init__(config)
 
     def convert(self, video):
+        """Converts video to more optimized format. Converted
+        files are not immediately removed, but sent to trash.
+        """
         avconv_params = self.config['avocnv']
         avconv_params = shlex.split(avconv_params)
 

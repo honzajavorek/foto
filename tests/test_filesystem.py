@@ -3,7 +3,7 @@
 
 import os
 from elk import filesystem
-from .utils import FileTestCase
+from .base import FileTestCase
 
 
 class FileTest(FileTestCase):
@@ -16,7 +16,8 @@ class FileTest(FileTestCase):
 
     def test_bytes(self):
         f = filesystem.File(self.filename)
-        self.assertEqual(f.bytes, self.bytes / 1024)  # kB
+        self.assertEqual(f.bytes, self.bytes)
+        self.assertEqual(f.kilobytes, self.bytes / 1024)
 
     def test_open(self):
         f = filesystem.File(self.filename)

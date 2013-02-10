@@ -2,7 +2,7 @@
 
 
 from elk import photo
-from .utils import PhotoTestCase
+from .base import PhotoTestCase
 
 
 class MetadataTest(PhotoTestCase):

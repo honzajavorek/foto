@@ -6,6 +6,7 @@ from elk.photo import Album, PhotoEditor
 
 
 def captions(dir, config):
+    """Reads captions of photos."""
     config = dict(config.items('album'))
     album = Album(dir, config)
 
@@ -17,6 +18,7 @@ def captions(dir, config):
 
 
 def fix_captions(dir, config):
+    """Fixes captions of photos."""
     config = dict(config.items('album'))
     album = Album(dir, config)
     editor = PhotoEditor()
@@ -38,6 +40,7 @@ def fix_captions(dir, config):
 
 
 def wipe_captions(dir, config):
+    """Wipes captions from photos."""
     config = dict(config.items('album'))
     album = Album(dir, config)
 

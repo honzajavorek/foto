@@ -7,7 +7,7 @@ import tempfile
 from ConfigParser import NoOptionError
 
 from elk import config
-from .utils import TestCase
+from .base import TestCase
 
 
 class Config(config.Config):

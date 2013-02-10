@@ -6,6 +6,7 @@ import json
 
 
 class Cache(dict):
+    """Simple JSON file-based cache with :class:`dict`-like interface."""
 
     def __init__(self, filename, *args, **kwargs):
         self.filename = filename
@@ -22,6 +23,7 @@ class Cache(dict):
             self.update(json.loads(contents))
 
     def save(self):
+        """Saves cache contents to disk."""
         dir = os.path.dirname(self.filename)
         if not os.path.exists(dir):
             os.makedirs(dir)

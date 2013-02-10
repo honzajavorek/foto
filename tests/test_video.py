@@ -2,7 +2,7 @@
 
 
 from elk import video, config
-from .utils import VideoTestCase
+from .base import VideoTestCase
 
 
 class VideoEditorTest(VideoTestCase):

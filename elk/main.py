@@ -4,16 +4,16 @@
 """Elk.
 
 Usage:
-    elk organize [-d]
-    elk auto [-d]
-    elk upload [-d]
-    elk sync [-d]
-    elk video [-d]
-    elk panorama [-d]
-    elk info [-d]
-    elk captions [-d]
-    elk wipe [info|captions] [-d]
-    elk fix [captions] [-d]
+    elk organize
+    elk auto
+    elk upload
+    elk sync
+    elk video
+    elk panorama
+    elk info
+    elk captions
+    elk wipe [info|captions]
+    elk fix [captions]
     elk -h|--help
     elk --version
 
@@ -34,14 +34,15 @@ Options:
     fix captions        Fix all captions in current directory.
     -h --help           Show this screen.
     --version           Show elk version.
-    -d                  Debug mode.
 """
 
 
 import os
-import logging as log
+import sys
+import logging
 from docopt import docopt
 from itertools import permutations
+from contextlib import contextmanager
 
 from elk import commands
 from elk import __version__
@@ -57,15 +58,15 @@ def parse_args():
 
 
 def setup_logging(debug=False):
-    """Basic logging setup."""
-    log_format = '[%(levelname)s] %(message)s'
-    log_level = log.DEBUG if debug else log.INFO
-    log.basicConfig(format=log_format, level=log_level)
+    """Basic :mod:`logging` setup."""
+    format = '[%(levelname)s] %(message)s'
+    level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(format=format, level=level)
 
 
 def find_command(args):
-    """In elk.commands module tries to find a command correspoding
-    to given args.
+    """Tries to find a command correspoding to given args
+    in :mod:`elk.commands` module.
     """
     args_count = len(args)
     if args_count < 1:
@@ -75,34 +76,50 @@ def find_command(args):
     else:
         for ordered_args in permutations(args):
             cmd_name = '_'.join(ordered_args)  # construct function name
-            log.debug('Looking for command %s.', cmd_name)
+            logging.debug('Looking for command %s.', cmd_name)
             if hasattr(commands, cmd_name):
                 return cmd_name
     return None
 
 
+def run_command(cmd_name, directory=None):
+    """Runs command from :mod:`elk.commands` module."""
+    config = Config()
+    directory = directory or os.getcwdu()
+
+    logging.debug('Directory: %s', directory)
+    logging.debug('Executing %r.', cmd_name)
+
+    try:
+        fn = getattr(commands, cmd_name)
+    except AttributeError:
+        raise NotImplementedError('No implementation found.')
+    fn(directory, config=config)
+
+
+@contextmanager
+def exc_capture():
+    """Exception capturing wrapper."""
+    try:
+        yield
+    except Exception as e:
+        logging.exception(e)
+        sys.exit(1)
+
+
 def main():
     """Handles arguments parsing and command execution."""
     args = parse_args()
-    debug = '-d' in args
 
-    setup_logging(debug)
-    if debug:
-        args.remove('-d')
-    log.debug('Given args: %r', args)
+    setup_logging(os.getenv('ELK_DEBUG'))
+    logging.debug('Given args: %r', args)
 
-    cmd_name = find_command(args)
-    if cmd_name:
-        config = Config()
-        current_dir = os.getcwdu()
-
-        log.debug('Current directory is: %s', current_dir)
-        log.debug('Executing %r.', cmd_name)
-
-        fn = getattr(commands, cmd_name)
-        fn(current_dir, config=config)
-    else:
-        raise NotImplementedError('No implementation found for given args.')
+    with exc_capture():
+        cmd_name = find_command(args)
+        if cmd_name:
+            run_command(cmd_name)
+        else:
+            raise NotImplementedError('No implementation found.')
 
 
 if __name__ == '__main__':

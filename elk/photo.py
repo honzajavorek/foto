@@ -7,11 +7,13 @@ import datetime
 from sh import exiftool
 from wand.image import Image
 
-from elk import parallel
 from elk.filesystem import File, FileEditor, Directory, DirectoryEditor
 
 
 class Metadata(object):
+    """Photo's metadata abstraction with :class:`dict`-like interface.
+    Uses subprocess calls to ExifTool.
+    """
 
     _tag_re = re.compile(r'^[^:]+:\s*')
 
@@ -21,6 +23,7 @@ class Metadata(object):
     def __getitem__(self, tag):
         tag_opt = '-' + tag
         try:
+            # try IPTC first
             output = str(exiftool(self.filename, '-charset', 'iptc=UTF8',
                          tag_opt))
             if re.match('Warning', output):
@@ -67,6 +70,7 @@ class Metadata(object):
 
 
 class Photo(File):
+    """Photo abstraction object based on :class:`~elk.filesystem.File`."""
 
     _datetime_re = re.compile(r'(\d{4})\W(\d{2})\W(\d{2})'
                               r'\s'
@@ -79,16 +83,19 @@ class Photo(File):
 
     @property
     def caption(self):
+        """Returns photo's caption."""
         return self.metadata.get('Headline',
                                  self.metadata['Caption-Abstract'])
 
     @caption.setter
     def caption(self, value):
+        """Sets photo's caption."""
         self.metadata['Headline'] = value
         del self.metadata['Caption-Abstract']
 
     @property
     def datetime(self):
+        """Photo's date of creation."""
         if not self._datetime:
             dt = self.metadata.get('DateTimeOriginal',
                                    self.metadata['CreateDate'])
@@ -100,19 +107,26 @@ class Photo(File):
 
     @property
     def size(self):
+        """Returns tuple (width, height) of image's dimensions."""
         with Image(filename=self.filename) as img:
             return img.size
 
 
 class PhotoEditor(FileEditor):
+    """Manipulates :class:`Photo` objects."""
 
     def resize(self, photo, width, height):
+        """Resizes photo to given dimensions."""
         with Image(filename=photo.filename) as img:
             img.resize(width, height)
             img.save(filename=photo.filename)
         return photo.__class__(photo.filename)
 
     def fix_caption(self, photo):
+        """Fixes photo's caption if it is somehow corrupted.
+        Removes redundant quoting, fixes encoding, saves
+        caption to it's proper meta tag.
+        """
         caption = unicode(photo.caption or '')
 
         single_quoted = caption[0] in "'" and caption[-1] == "'"
@@ -126,6 +140,7 @@ class PhotoEditor(FileEditor):
 
 
 class Info(object):
+    """Album info object."""
 
     _parser_re = re.compile(r'([^\n]+)\n(\(([^\)]+)\)\n)?(\n([^\n]+))?\s*',
                             re.MULTILINE | re.DOTALL)
@@ -136,18 +151,15 @@ class Info(object):
 
 
 class Album(Directory):
+    """Album object based on :class:`~elk.filesystem.Directory`."""
 
     _name_re = re.compile(r'(\d{4}\-\d{2}\-\d{2})?\s*(.+)')
 
     def __init__(self, path, config):
         super(Album, self).__init__(path)
 
-        if 'info_basename' not in config:
-            raise ValueError("Key 'info_basename' is missing "
-                             "in config given.")
-        if 'cover_basename' not in config:
-            raise ValueError("Key 'cover_basename' is missing "
-                             "in config given.")
+        assert 'info_basename' in config
+        assert 'cover_basename' in config
         self.config = config
 
         self.info = Info(os.path.join(self.path,
@@ -157,9 +169,13 @@ class Album(Directory):
         self._date, self.title = self.parse_name()
 
     def list(self):
+        """Lists only files of JPEG photos, returns
+        :class:`Photo` instances.
+        """
         return super(Album, self).list(ext='.jpg', cls=Photo)
 
     def parse_name(self):
+        """Parses directory's name to get album's date and title."""
         date = None
         title = self.name
 
@@ -173,6 +189,9 @@ class Album(Directory):
 
     @property
     def date(self):
+        """Provides date. In case it's missing,
+        automatic detection from photos takes place.
+        """
         if not self._date:
             dt = datetime.datetime.now()
             for photo in self.list():
@@ -183,6 +202,7 @@ class Album(Directory):
 
     @property
     def cover(self):
+        """Provides cover photo."""
         try:
             filename = self._cover.content.strip()
             if not filename:
@@ -197,12 +217,17 @@ class Album(Directory):
 
     @cover.setter
     def cover(self, photo):
+        """Sets cover photo."""
         self._cover.content = photo.filename
 
 
 class AlbumEditor(DirectoryEditor):
+    """Manipulates :class:`Album` objects."""
 
     def fix_name(self, album):
+        """Fixes album's name according to convention.
+        Date is automatically detected from photos.
+        """
         date, name = album.parse_name()
         if not date:
             new_name = str(album.date) + ' ' + name
