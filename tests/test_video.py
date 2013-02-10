@@ -7,13 +7,14 @@ from .base import VideoTestCase
 
 class VideoEditorTest(VideoTestCase):
 
-    def test_resize(self):
+    def test_convert(self):
         c = dict(config.Config().items('video'))
 
         ve = video.VideoEditor(c)
-        orig_v = video.Video(self.filename)
+        orig = video.Video(self.filename)
+        orig_bytes = orig.bytes
 
-        new_v = ve.convert(orig_v)
+        new = ve.convert(orig)
 
-        self.assertTrue(new_v.filename.endswith(c['format']))
-        self.assertGreater(orig_v.bytes, new_v.bytes)
+        self.assertTrue(new.filename.endswith(c['format']))
+        self.assertGreater(orig_bytes, new.bytes)

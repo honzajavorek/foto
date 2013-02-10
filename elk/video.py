@@ -26,17 +26,18 @@ class VideoEditor(FileEditor):
         """Converts video to more optimized format. Converted
         files are not immediately removed, but sent to trash.
         """
-        avconv_params = self.config['avocnv']
-        avconv_params = shlex.split(avconv_params)
+        params = self.config['avocnv']
+        params = shlex.split(params)
 
         name, _ = os.path.splitext(video.filename)
-        filename = '.'.join([name, self.config['format']])
+        new_video = video.__class__(name + '.' + self.config['format'],
+                                    new_unique=True)
 
-        avconv_params = ['-i', video.filename] + avconv_params + [filename]
-        avconv(*avconv_params)
+        params = ['-i', video.filename] + params + [new_video.filename]
+        avconv(*params)
 
         try:
             send2trash(video.filename)
         except OSError:
             pass  # permission denied
-        return video.__class__(filename)
+        return new_video

@@ -8,6 +8,10 @@ from .base import FileTestCase
 
 class FileTest(FileTestCase):
 
+    def test_overwrite(self):
+        f = filesystem.File(self.filename, new_unique=True)
+        self.assertFalse(f.exists)
+
     def test_exists(self):
         f = filesystem.File(self.filename)
         self.assertTrue(f.exists)

@@ -3,6 +3,7 @@
 
 import os
 import sys
+import itertools
 
 
 system_encoding = sys.getfilesystemencoding()
@@ -11,12 +12,31 @@ system_encoding = sys.getfilesystemencoding()
 class File(object):
     """File abstraction object."""
 
-    def __init__(self, filename):
+    def __init__(self, filename, new_unique=False):
+        """
+        :param filename: Path to the file.
+        :new_unique: If :obj:`True`, unique name is generated
+                     if *filename* already exists to prevent
+                     overwrites.
+        """
         if not isinstance(filename, unicode):
             filename = filename.decode(system_encoding)
 
-        self.filename = filename
-        self.name = os.path.basename(filename)
+        if new_unique:
+            self.filename = self._find_unique_filename(filename)
+        else:
+            self.filename = filename
+
+        self.name = os.path.basename(self.filename)
+
+    def _find_unique_filename(self, filename):
+        """Returns first non-existing filename similar to the given one."""
+        name, ext = os.path.splitext(filename)
+        for i in itertools.count():
+            if i > 0:
+                filename = '{0}_{1}{2}'.format(name, i, ext)
+            if not os.path.isfile(filename):
+                return filename
 
     @property
     def exists(self):
