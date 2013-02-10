@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 
+import time
+from send2trash import send2trash
+
 from elk import parallel
+from elk.cache import Cache
 from elk.filesystem import Directory
 from elk.photo import Album, PhotoEditor
 from elk.video import Video, VideoEditor
@@ -58,16 +62,41 @@ def wipe_captions(directory, config):
 
 def video(directory, config):
     """Converts all videos."""
-    config = dict(config.items('video'))
-    editor = VideoEditor(config=config)
+    editor = VideoEditor(config=dict(config.items('video')))
+    cache = Cache(config.getfilename('cache', 'filename'))
 
-    directory = Directory(directory)
+    old_videos = Directory(directory).list(ext='.MOV', cls=Video)
+
+    factor = cache.get('last_mov_time_factor')
+    if factor:
+        total = 0
+        for old_video in old_videos:
+            time_est = (old_video.megabytes / factor) / 60
+            total += time_est
+            print u'{0} estimate: {1:.1f}min'.format(old_video.name, time_est)
+        print u'Total estimate: {0:.1f}min\n'.format(total)
 
     def convert(video):
-        return editor.convert(video)
+        start = time.time()
+        return editor.convert(video), time.time() - start
+    results = parallel.map(convert, old_videos)
 
-    old_videos = directory.list(ext='.MOV', cls=Video)
-    new_videos = parallel.map(convert, old_videos)
+    for old_video, (new_video, t) in zip(old_videos, results):
+        compression = (old_video.megabytes / new_video.megabytes)
+        factor = old_video.megabytes / t
 
-    for old_video, new_video in zip(old_videos, new_videos):
-        print u'{0}: {1}'.format(old_video.name, new_video.name)
+        # print summary
+        line = u'{0}: {1:.1f}MB -> {2} {3:.1f}MB, {4:.1f}min, {5:.1f}x'.format(
+            old_video.name, old_video.megabytes, new_video.name,
+            new_video.megabytes, t / 60, compression
+        )
+        print line
+
+        # trash the original file
+        try:
+            send2trash(old_video.filename)
+        except OSError:
+            pass  # permission denied
+
+    cache['last_mov_time_factor'] = factor
+    cache.save()

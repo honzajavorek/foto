@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import division
+
 import os
 import sys
 import itertools
@@ -39,6 +41,11 @@ class File(object):
                 return filename
 
     @property
+    def extension(self):
+        """Returns lowercased extension."""
+        return os.path.splitext(self.filename)[1][1:].lower()
+
+    @property
     def exists(self):
         """Whether file exists."""
         return os.path.isfile(self.filename)
@@ -49,9 +56,9 @@ class File(object):
         return os.path.getsize(self.filename)
 
     @property
-    def kilobytes(self):
-        """Size of file in kilobytes."""
-        return self.bytes / 1024
+    def megabytes(self):
+        """Size of file in megabytes."""
+        return self.bytes / 1024 / 1024
 
     def open(self, *args, **kwargs):
         """Shorthand. Opens the file."""

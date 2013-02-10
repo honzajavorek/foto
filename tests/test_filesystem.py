@@ -21,7 +21,7 @@ class FileTest(FileTestCase):
     def test_bytes(self):
         f = filesystem.File(self.filename)
         self.assertEqual(f.bytes, self.bytes)
-        self.assertEqual(f.kilobytes, self.bytes / 1024)
+        self.assertEqual(f.megabytes, self.bytes / 1024 / 1024)
 
     def test_open(self):
         f = filesystem.File(self.filename)

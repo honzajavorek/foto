@@ -16,5 +16,5 @@ class VideoEditorTest(VideoTestCase):
 
         new = ve.convert(orig)
 
-        self.assertTrue(new.filename.endswith(c['format']))
+        self.assertTrue(new.filename.endswith('avi'))
         self.assertGreater(orig_bytes, new.bytes)
