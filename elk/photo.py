@@ -139,6 +139,10 @@ class PhotoEditor(FileEditor):
         photo.caption = caption or None
         return photo
 
+    def edit_caption(self, photo):
+        """Automates editation of photo's caption."""
+        return photo
+
 
 class Info(object):
     """Album info object."""

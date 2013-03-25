@@ -27,24 +27,25 @@ def captions_fix(directory):
     album = Album(directory)
     editor = PhotoEditor()
 
-    def fix_caption(photo):
-        caption = photo.caption
-        if caption:
-            photo = editor.fix_caption(photo)
-            new_caption = photo.caption
-            return caption, new_caption
-        return None, None
-
-    photos = album.list()
-    captions = parallel.map(fix_caption, photos)
-
-    for photo, (caption, new_caption) in zip(photos, captions):
-        if caption and new_caption:
-            print u'{0}: {1} -> {2}'.format(photo.name, caption, new_caption)
+    for photo in album.list():
+        if not photo.caption:
+            continue
+        old_caption = photo.caption
+        photo = editor.fix_caption(photo)
+        new_caption = photo.caption or ' - '
+        print u'{0}: {1} -> {2}'.format(photo.name, old_caption, new_caption)
 
 
 def captions_edit(directory):
-    AlbumEditor().edit_info(Album(directory))
+    """Automates editing captions."""
+    album = Album(directory)
+    editor = PhotoEditor()
+
+    for photo in album.list():
+        old_caption = photo.caption or ' - '
+        photo = editor.edit_caption(photo)
+        new_caption = photo.caption or ' - '
+        print u'{0}: {1} -> {2}'.format(photo.name, old_caption, new_caption)
 
 
 def captions_wipe(directory):
@@ -67,12 +68,9 @@ def info(directory):
     print unicode(album.info)
 
 
-# def info_edit(directory):
-#     """Automates editing album info."""
-#     basename = config.getfilename('album', 'info_basename')
-#     command = config.
-#     filename = os.path.join(directory, basename)
-#     sublime_text(filename)
+def info_edit(directory):
+    """Automates editing album info."""
+    AlbumEditor().edit_info(Album(directory))
 
 
 def video(directory):
