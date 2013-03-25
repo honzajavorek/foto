@@ -5,6 +5,7 @@ import os
 import shlex
 from sh import avconv
 
+from elk import config
 from elk.filesystem import File, FileEditor
 
 
@@ -20,12 +21,13 @@ class VideoEditor(FileEditor):
         """Converts video to more optimized format. Converted
         files are not immediately removed, but sent to trash.
         """
-        if video.extension not in self.config:
+        if not config.has_option('video', video.extension):
             message = ('No configuration for '
                        'encoding of {0}.'.format(video.extension))
             raise NotImplementedError(message)
 
-        params = self.config[video.extension]
+        params = config.get('video', video.extension)
+
         params = shlex.split(params)
         output_format = params[params.index('-f') + 1]
 

@@ -6,6 +6,8 @@ import shutil
 import tempfile
 import datetime
 
+from elk import config
+
 try:
     import unittest2 as unittest
 except ImportError:
@@ -13,7 +15,9 @@ except ImportError:
 
 
 class TestCase(unittest.TestCase):
-    pass
+
+    def setUp(self):
+        config.load()
 
 
 class FileTestCase(TestCase):
@@ -22,6 +26,8 @@ class FileTestCase(TestCase):
     bytes = 0
 
     def setUp(self):
+        super(FileTestCase, self).setUp()
+
         filename = os.path.join(os.path.dirname(__file__), self.basename)
         temp_dir = tempfile.mkdtemp()
         shutil.copy(filename, temp_dir)
@@ -34,6 +40,7 @@ class FileTestCase(TestCase):
 
 
 class PhotoTestCase(FileTestCase):
+
     basename = 'P1150648.JPG'
     bytes = 3419633
     datetime = datetime.datetime(2011, 11, 11, 16, 27, 25)
@@ -41,5 +48,6 @@ class PhotoTestCase(FileTestCase):
 
 
 class VideoTestCase(FileTestCase):
+
     basename = 'P1170591.MOV'
     bytes = 2820346

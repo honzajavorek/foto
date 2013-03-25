@@ -7,6 +7,7 @@ import datetime
 from sh import exiftool
 from wand.image import Image
 
+from elk import config
 from elk.filesystem import File, FileEditor, Directory, DirectoryEditor
 
 
@@ -163,7 +164,7 @@ class Info(object):
         except IOError:
             pass
 
-        self._file = f
+        self.file = f
 
     def _parse_locations(self, line):
         locations = map(unicode.strip, line.split(','))
@@ -178,7 +179,7 @@ class Info(object):
         return s
 
     def _save(self):
-        self._file.content = unicode(self)
+        self.file.content = unicode(self)
 
     @property
     def title(self):
@@ -214,17 +215,16 @@ class Album(Directory):
 
     _name_re = re.compile(r'(\d{4}\-\d{2}\-\d{2})?\s*(.+)')
 
-    def __init__(self, path, config):
+    def __init__(self, path):
         super(Album, self).__init__(path)
 
-        assert 'info_basename' in config
-        assert 'cover_basename' in config
-        self.config = config
+        info_filename = os.path.join(self.path,
+                                     config.get('album', 'info_basename'))
+        cover_filename = os.path.join(self.path,
+                                      config.get('album', 'cover_basename'))
 
-        self.info = Info(os.path.join(self.path,
-                                      config['info_basename']))
-        self._cover = File(os.path.join(self.path,
-                                        config['cover_basename']))
+        self.info = Info(info_filename)
+        self._cover = File(cover_filename)
         self._date, title = self.parse_name()
 
         self.title = title
@@ -295,3 +295,8 @@ class AlbumEditor(DirectoryEditor):
             new_name = str(album.date) + ' ' + name
             album = self.rename(album, new_name)
         return album
+
+    def edit_info(self, album):
+        """Opens album's info file in text editor."""
+        editor = FileEditor()
+        editor.edit(album.info.file)

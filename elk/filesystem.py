@@ -5,7 +5,11 @@ from __future__ import division
 
 import os
 import sys
+import shlex
 import itertools
+from sh import Command
+
+from elk import config
 
 
 system_encoding = sys.getfilesystemencoding()
@@ -96,9 +100,6 @@ class File(object):
 class FileEditor(object):
     """File editor abstract class."""
 
-    def __init__(self, config=None):
-        self.config = config or {}
-
     def lowercase_ext(self, file_obj):
         """Lowercases extension."""
         name, ext = os.path.splitext(file_obj.filename)
@@ -111,6 +112,13 @@ class FileEditor(object):
         os.rename(with_upper_ext, with_lower_ext)
 
         return file_obj.__class__(with_lower_ext)
+
+    def edit(self, file_obj):
+        """Opens file in text editor."""
+        cmd_parts = shlex.split(config.get('editor', 'command'))
+        cmd = Command(cmd_parts[0])
+        args = cmd_parts[1:] + [file_obj.filename]
+        cmd(*args)
 
 
 class Directory(object):
@@ -156,9 +164,6 @@ class Directory(object):
 
 class DirectoryEditor(object):
     """Directory editor abstract class."""
-
-    def __init__(self, config=None):
-        self.config = config or {}
 
     def rename(self, dir_obj, name):
         """Renames directory."""

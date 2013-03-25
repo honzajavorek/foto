@@ -13,6 +13,7 @@ Usage:
     elk info
     elk info:edit
     elk captions
+    elk captions:edit
     elk captions:wipe
     elk captions:fix
     elk -h|--help
@@ -31,6 +32,7 @@ Options:
     info                Print current directory info.
     info:edit           Edit current directory info.
     captions            Print all captions in current directory.
+    captions:edit       Edit all captions in current directory.
     captions:wipe       Wipe all captions in current directory.
     captions:fix        Fix all captions in current directory.
     -h --help           Show this screen.
@@ -44,9 +46,10 @@ import logging
 from docopt import docopt
 from contextlib import contextmanager
 
+
+from elk import config
 from elk import commands
 from elk import __version__
-from elk.config import Config
 
 
 def parse_args():
@@ -78,7 +81,6 @@ def find_command(args):
 
 def run_command(cmd_name, directory=None):
     """Runs command from :mod:`elk.commands` module."""
-    config = Config()
     directory = directory or os.getcwdu()
 
     logging.debug('Directory: %s', directory)
@@ -88,7 +90,7 @@ def run_command(cmd_name, directory=None):
         fn = getattr(commands, cmd_name)
     except AttributeError:
         raise NotImplementedError('No implementation found.')
-    fn(directory, config=config)
+    fn(directory)
 
 
 @contextmanager
@@ -104,6 +106,7 @@ def exc_capture():
 def main():
     """Handles arguments parsing and command execution."""
     args = parse_args()
+    config.load()
 
     setup_logging(os.getenv('ELK_DEBUG'))
     logging.debug('Given args: %r', args)

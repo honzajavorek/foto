@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
 
-from elk import video, config
+from elk import video
 from .base import VideoTestCase
 
 
 class VideoEditorTest(VideoTestCase):
 
     def test_convert(self):
-        c = dict(config.Config().items('video'))
-
-        ve = video.VideoEditor(c)
+        ve = video.VideoEditor()
         orig = video.Video(self.filename)
         orig_bytes = orig.bytes
 

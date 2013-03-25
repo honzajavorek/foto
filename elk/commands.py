@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
 
 
-import os
 import time
 from send2trash import send2trash
-from sh import subl as sublime_text
 
-from elk import parallel
+from elk import config, parallel
 from elk.cache import Cache
 from elk.filesystem import Directory
-from elk.photo import Album, PhotoEditor
 from elk.video import Video, VideoEditor
+from elk.photo import Album, PhotoEditor, AlbumEditor
 
 
-def captions(directory, config):
+def captions(directory):
     """Reads captions of photos."""
-    config = dict(config.items('album'))
-    album = Album(directory, config)
+    album = Album(directory)
 
     photos = album.list()
     captions = parallel.map(lambda photo: photo.caption, photos)
@@ -25,10 +22,9 @@ def captions(directory, config):
         print u'{0}: {1}'.format(photo.name, caption or ' - ')
 
 
-def captions_fix(directory, config):
+def captions_fix(directory):
     """Fixes captions of photos."""
-    config = dict(config.items('album'))
-    album = Album(directory, config)
+    album = Album(directory)
     editor = PhotoEditor()
 
     def fix_caption(photo):
@@ -47,10 +43,13 @@ def captions_fix(directory, config):
             print u'{0}: {1} -> {2}'.format(photo.name, caption, new_caption)
 
 
-def captions_wipe(directory, config):
+def captions_edit(directory):
+    AlbumEditor().edit_info(Album(directory))
+
+
+def captions_wipe(directory):
     """Wipes captions from photos."""
-    config = dict(config.items('album'))
-    album = Album(directory, config)
+    album = Album(directory)
 
     def clear_caption(photo):
         photo.caption = None
@@ -62,23 +61,23 @@ def captions_wipe(directory, config):
         print u'{0}:  - '.format(photo.name)
 
 
-def info(directory, config):
+def info(directory):
     """Lists album info."""
-    config = dict(config.items('album'))
-    album = Album(directory, config)
+    album = Album(directory)
     print unicode(album.info)
 
 
-def info_edit(directory, config):
-    """Automates editing album info."""
-    basename = config.getfilename('album', 'info_basename')
-    filename = os.path.join(directory, basename)
-    sublime_text(filename, new_window=True, wait=True)
+# def info_edit(directory):
+#     """Automates editing album info."""
+#     basename = config.getfilename('album', 'info_basename')
+#     command = config.
+#     filename = os.path.join(directory, basename)
+#     sublime_text(filename)
 
 
-def video(directory, config):
+def video(directory):
     """Converts all videos."""
-    editor = VideoEditor(config=dict(config.items('video')))
+    editor = VideoEditor()
     cache = Cache(config.getfilename('cache', 'filename'))
 
     old_videos = Directory(directory).list(ext='.MOV', cls=Video)
