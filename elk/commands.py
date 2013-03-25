@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
+import os
 import time
 from send2trash import send2trash
+from sh import subl as sublime_text
 
 from elk import parallel
 from elk.cache import Cache
@@ -65,6 +67,13 @@ def info(directory, config):
     config = dict(config.items('album'))
     album = Album(directory, config)
     print unicode(album.info)
+
+
+def info_edit(directory, config):
+    """Automates editing album info."""
+    basename = config.getfilename('album', 'info_basename')
+    filename = os.path.join(directory, basename)
+    sublime_text(filename, new_window=True, wait=True)
 
 
 def video(directory, config):

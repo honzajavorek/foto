@@ -11,7 +11,7 @@ Usage:
     elk video
     elk panorama
     elk info
-    elk info:wipe
+    elk info:edit
     elk captions
     elk captions:wipe
     elk captions:fix
@@ -29,7 +29,7 @@ Options:
     video               Convert all videos in current directory.
     panorama            Detect and convert all panoramas in current directory.
     info                Print current directory info.
-    info:wipe           Wipe current directory info.
+    info:edit           Edit current directory info.
     captions            Print all captions in current directory.
     captions:wipe       Wipe all captions in current directory.
     captions:fix        Fix all captions in current directory.
