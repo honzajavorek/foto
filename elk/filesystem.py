@@ -68,11 +68,13 @@ class File(object):
     def content(self):
         """Reads files's content."""
         with self.open() as f:
-            return f.read()
+            return f.read().decode('utf-8')
 
     @content.setter
     def content(self, value):
         """Writes files's content."""
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
         with self.open('w') as f:
             f.write(value or '')
 

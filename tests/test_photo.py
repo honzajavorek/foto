@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
+import os
+
 from elk import photo
-from .base import PhotoTestCase
+from .base import FileTestCase, PhotoTestCase
 
 
 class MetadataTest(PhotoTestCase):
@@ -58,6 +60,58 @@ class MetadataTest(PhotoTestCase):
         sample = '2 - 3 = -1'
         metadata['Headline'] = sample
         self.assertEqual(metadata['Headline'], sample)
+
+
+class InfoTest(FileTestCase):
+
+    def test_read_empty(self):
+        i = photo.Info(self.filename)
+        self.assertIsNone(i.title)
+        self.assertEqual(i.locations, [])
+        self.assertIsNone(i.description)
+
+    def test_read_missing(self):
+        os.remove(self.filename)
+        i = photo.Info(self.filename)
+        self.assertIsNone(i.title)
+        self.assertEqual(i.locations, [])
+        self.assertIsNone(i.description)
+
+    def test_write(self):
+        i = photo.Info(self.filename)
+
+        i.title = u'Telefonní budky'
+        i.locations = ['Brno']
+        i.description = u'Sbírka telefonních budek.\nVážně!'
+
+        self.assertEqual(i.title, u'Telefonní budky')
+        self.assertEqual(i.locations, ['Brno'])
+        self.assertEqual(i.description, u'Sbírka telefonních budek.\nVážně!')
+        self.assertEqual(unicode(i), u'Telefonní budky\n'
+                                     u'(Brno)\n'
+                                     u'\nSbírka telefonních budek.\nVážně!\n')
+
+    def test_write_partial(self):
+        i = photo.Info(self.filename)
+
+        i.title = u'Telefonní budky'
+        i.description = u'Sbírka telefonních budek.\nVážně!'
+        self.assertEqual(unicode(i), u'Telefonní budky\n'
+                                     u'\nSbírka telefonních budek.\nVážně!\n')
+
+        i.locations = ['Brno', 'Ostrava']
+        i.description = None
+        self.assertEqual(unicode(i), u'Telefonní budky\n'
+                                     u'(Brno, Ostrava)\n')
+
+    def test_read_none(self):
+        with open(self.filename, 'w') as f:
+            f.write(u'Titulek\n(None)\n\nPopisek.'.encode('utf-8'))
+
+        i = photo.Info(self.filename)
+        self.assertEqual(i.locations, [])
+        self.assertEqual(unicode(i), u'Titulek\n'
+                                     u'\nPopisek.\n')
 
 
 class PhotoTest(PhotoTestCase):

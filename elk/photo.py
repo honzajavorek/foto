@@ -146,8 +146,67 @@ class Info(object):
                             re.MULTILINE | re.DOTALL)
 
     def __init__(self, filename):
-        self.filename = filename
-        self.name = os.path.basename(filename)
+        f = File(filename)
+
+        self._title = None
+        self._locations = []
+        self._description = None
+
+        try:
+            content = f.content.strip()
+            match = self._parser_re.match(content)
+
+            if match:
+                self._title = match.group(1)
+                self._locations = self._parse_locations(match.group(3))
+                self._description = match.group(5)
+        except IOError:
+            pass
+
+        self._file = f
+
+    def _parse_locations(self, line):
+        locations = map(unicode.strip, line.split(','))
+        return filter(lambda x: not (x == 'None' or not x), locations)
+
+    def __unicode__(self):
+        s = (self._title or '') + '\n'
+        if self._locations:
+            s += '(' + ', '.join(self._locations) + ')\n'
+        if self._description:
+            s += '\n' + self._description + '\n'
+        return s
+
+    def _save(self):
+        self._file.content = unicode(self)
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, title):
+        assert title
+        self._title = title
+        self._save()
+
+    @property
+    def locations(self):
+        return self._locations
+
+    @locations.setter
+    def locations(self, locations):
+        self._locations = locations
+        self._save()
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        self._description = description
+        self._save()
 
 
 class Album(Directory):
@@ -166,7 +225,10 @@ class Album(Directory):
                                       config['info_basename']))
         self._cover = File(os.path.join(self.path,
                                         config['cover_basename']))
-        self._date, self.title = self.parse_name()
+        self._date, title = self.parse_name()
+
+        self.title = title
+        self.info.title = title
 
     def list(self):
         """Lists only files of JPEG photos, returns

@@ -23,7 +23,7 @@ def captions(directory, config):
         print u'{0}: {1}'.format(photo.name, caption or ' - ')
 
 
-def fix_captions(directory, config):
+def captions_fix(directory, config):
     """Fixes captions of photos."""
     config = dict(config.items('album'))
     album = Album(directory, config)
@@ -45,7 +45,7 @@ def fix_captions(directory, config):
             print u'{0}: {1} -> {2}'.format(photo.name, caption, new_caption)
 
 
-def wipe_captions(directory, config):
+def captions_wipe(directory, config):
     """Wipes captions from photos."""
     config = dict(config.items('album'))
     album = Album(directory, config)
@@ -58,6 +58,13 @@ def wipe_captions(directory, config):
 
     for photo in photos:
         print u'{0}:  - '.format(photo.name)
+
+
+def info(directory, config):
+    """Lists album info."""
+    config = dict(config.items('album'))
+    album = Album(directory, config)
+    print unicode(album.info)
 
 
 def video(directory, config):

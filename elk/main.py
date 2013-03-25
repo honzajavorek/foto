@@ -11,9 +11,10 @@ Usage:
     elk video
     elk panorama
     elk info
+    elk info:wipe
     elk captions
-    elk wipe [info|captions]
-    elk fix [captions]
+    elk captions:wipe
+    elk captions:fix
     elk -h|--help
     elk --version
 
@@ -28,10 +29,10 @@ Options:
     video               Convert all videos in current directory.
     panorama            Detect and convert all panoramas in current directory.
     info                Print current directory info.
+    info:wipe           Wipe current directory info.
     captions            Print all captions in current directory.
-    wipe info           Wipe current directory info.
-    wipe captions       Wipe all captions in current directory.
-    fix captions        Fix all captions in current directory.
+    captions:wipe       Wipe all captions in current directory.
+    captions:fix        Fix all captions in current directory.
     -h --help           Show this screen.
     --version           Show elk version.
 """
@@ -41,7 +42,6 @@ import os
 import sys
 import logging
 from docopt import docopt
-from itertools import permutations
 from contextlib import contextmanager
 
 from elk import commands
@@ -72,13 +72,7 @@ def find_command(args):
     if args_count < 1:
         return None
     if args_count == 1:
-        return args[0]
-    else:
-        for ordered_args in permutations(args):
-            cmd_name = '_'.join(ordered_args)  # construct function name
-            logging.debug('Looking for command %s.', cmd_name)
-            if hasattr(commands, cmd_name):
-                return cmd_name
+        return args[0].replace(':', '_')
     return None
 
 
