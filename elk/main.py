@@ -5,16 +5,15 @@
 
 Usage:
     elk organize
-    elk auto
     elk upload
     elk sync
-    elk video
+    elk optimize
+    elk optimize:jpg
+    elk optimize:mov
     elk panorama
     elk info
     elk info:edit
     elk captions
-    elk captions:edit
-    elk captions:wipe
     elk captions:fix
     elk -h|--help
     elk --version
@@ -23,17 +22,16 @@ Options:
     organize            Take all mess in current directory and place
                         it into directories where each of them represents
                         a single day.
-    auto                Automatically process current directory.
     upload              Upload current directory to remote storages.
     sync                Synchronize captions and info in current directory
                         with remote storages.
-    video               Convert all videos in current directory.
+    optimize            Optimizes all photos and videos in current directory.
+    optimize:jpg        Optimizes all photos in current directory.
+    optimize:mov        Optimizes all videos in current directory.
     panorama            Detect and convert all panoramas in current directory.
     info                Print current directory info.
     info:edit           Edit current directory info.
     captions            Print all captions in current directory.
-    captions:edit       Edit all captions in current directory.
-    captions:wipe       Wipe all captions in current directory.
     captions:fix        Fix all captions in current directory.
     -h --help           Show this screen.
     --version           Show elk version.
@@ -41,15 +39,16 @@ Options:
 
 
 import os
-import sys
-import logging
 from docopt import docopt
-from contextlib import contextmanager
 
-
-from elk import config
-from elk import commands
 from elk import __version__
+
+
+command_map = {
+    'captions': 'elk.captions.captions',
+    'captions:fix': 'elk.captions.captions_fix',
+    'captions:edit': 'elk.captions.captions_edit',
+}
 
 
 def parse_args():
@@ -60,63 +59,24 @@ def parse_args():
     return args
 
 
-def setup_logging(debug=False):
-    """Basic :mod:`logging` setup."""
-    format = '[%(levelname)s] %(message)s'
-    level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(format=format, level=level)
-
-
-def find_command(args):
-    """Tries to find a command correspoding to given args
-    in :mod:`elk.commands` module.
-    """
-    args_count = len(args)
-    if args_count < 1:
-        return None
-    if args_count == 1:
-        return args[0].replace(':', '_')
-    return None
-
-
-def run_command(cmd_name, directory=None):
-    """Runs command from :mod:`elk.commands` module."""
-    directory = directory or os.getcwdu()
-
-    logging.debug('Directory: %s', directory)
-    logging.debug('Executing %r.', cmd_name)
-
-    try:
-        fn = getattr(commands, cmd_name)
-    except AttributeError:
-        raise NotImplementedError('No implementation found.')
-    fn(directory)
-
-
-@contextmanager
-def exc_capture():
-    """Exception capturing wrapper."""
-    try:
-        yield
-    except Exception as e:
-        logging.exception(e)
-        sys.exit(1)
+def import_command(full_name):
+    components = full_name.split('.')
+    mod_name = '.'.join(components[0:-1])
+    func_name = components[-1]
+    module = __import__(mod_name, fromlist=[func_name])
+    return getattr(module, func_name)
 
 
 def main():
-    """Handles arguments parsing and command execution."""
+    """Handles parsing of arguments and execution of command."""
     args = parse_args()
-    config.load()
+    directory = os.getcwdu()
 
-    setup_logging(os.getenv('ELK_DEBUG'))
-    logging.debug('Given args: %r', args)
-
-    with exc_capture():
-        cmd_name = find_command(args)
-        if cmd_name:
-            run_command(cmd_name)
-        else:
-            raise NotImplementedError('No implementation found.')
+    cmd = import_command(command_map[args[0]])
+    try:
+        cmd(directory, *args[1:])
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':

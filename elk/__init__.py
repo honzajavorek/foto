@@ -1,10 +1,11 @@
 
 
-__version__ = '3.0.0.dev'
+__version__ = '3.0.0'
 
 
-from gevent import monkey
-monkey.patch_all()
+import os
+from ConfigParser import SafeConfigParser as Config
 
-from elk.configuration import Config
+
 config = Config()
+config.read(os.path.join(os.path.dirname(__file__), 'default.cfg'))
