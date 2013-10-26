@@ -8,7 +8,7 @@ This my hobby project is under bit-by-bit development. No rush. No other people 
 
 ## Installation
 
-Only *buntu box is oficially supported.
+Only my OS is oficially supported. My OS is currently Xubuntu.
 
     cat ubuntu_packages.txt | xargs apt-get -y install
     pip install https://github.com/honzajavorek/elk.git#egg=elk
