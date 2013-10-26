@@ -39,6 +39,7 @@ from elk import __version__
 
 command_map = {
     'arrange': 'elk.arrange.arrange',
+    'optimize:mov': 'elk.optimize.optimize_mov',
     'captions': 'elk.captions.captions',
     'captions:fix': 'elk.captions.captions_fix',
     'captions:edit': 'elk.captions.captions_edit',

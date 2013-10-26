@@ -4,6 +4,8 @@
 import os
 import sys
 
+from gi.repository import Notify
+
 
 system_encoding = sys.getfilesystemencoding()
 
@@ -34,3 +36,9 @@ def season(d):
     if 9 <= d.month <= 11:
         return u'podzim'
     return 'zima'
+
+
+def notify(name, message):
+    Notify.init(name)
+    n = Notify.Notification.new(name, message, 'dialog-information')
+    n.show()

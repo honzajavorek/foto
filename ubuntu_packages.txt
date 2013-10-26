@@ -5,4 +5,4 @@ libx264-120
 libx264-dev
 x264
 libnotify4
-python-gobject
+python-gobject-dev
