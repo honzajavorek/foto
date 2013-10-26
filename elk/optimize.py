@@ -14,6 +14,13 @@ from elk import config
 from elk.utils import list_files, notify
 
 
+def optimize(directory):
+    print "Optimizing JPG files..."
+    # optimize_jpg(directory)
+    print "Optimizing MOV files..."
+    optimize_mov(directory)
+
+
 def optimize_mov(directory):
     params = shlex.split(config.get('video', 'mov'))
     output_format = params[params.index('-f') + 1]

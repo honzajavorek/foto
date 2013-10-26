@@ -5,6 +5,7 @@
 
 Usage:
     elk arrange
+    elk auto
     elk optimize
     elk optimize:jpg
     elk optimize:mov
@@ -19,6 +20,8 @@ Options:
     arrange             Take all mess in current directory and place
                         it into directories where each of them represents
                         a single day.
+    auto                Does all standard operations with photos and videos
+                        in current directory.
     optimize            Optimizes all photos and videos in current directory.
     optimize:jpg        Optimizes all photos in current directory.
     optimize:mov        Optimizes all videos in current directory.
@@ -39,6 +42,8 @@ from elk import __version__
 
 command_map = {
     'arrange': 'elk.arrange.arrange',
+    'auto': 'elk.auto.auto',
+    'optimize': 'elk.optimize.optimize',
     'optimize:mov': 'elk.optimize.optimize_mov',
     'captions': 'elk.captions.captions',
     'captions:fix': 'elk.captions.captions_fix',
