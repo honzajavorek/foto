@@ -34,7 +34,7 @@ def arrange(directory):
 
         # move
         new_filename = os.path.join(new_dir_filename, basename)
-        filenames = [f.replace(directory, '') for f
+        filenames = [f.replace(directory, '').lstrip('/') for f
                      in [filename, new_filename]]
         if os.path.exists(new_filename):
             print u'EXISTS! {0} → {1}'.format(*filenames)

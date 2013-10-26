@@ -26,14 +26,21 @@ class _CreationDateResolver(object):
                 yield base + '.jpg'
                 yield base + '.JPG'
 
-    def resolve(self, filename):
-        for candidate in self._gen_candidates(filename):
+    def _find_in_tag(self, candidates, tag):
+        for candidate in candidates:
             if os.path.exists(candidate):
                 meta = Metadata(candidate)
-                dt = meta.get('CreateDate', meta['FileModifyDate'])
+                dt = meta[tag]
                 if dt:
                     return dt.date()
         return None
+
+    def resolve(self, filename):
+        candidates = list(self._gen_candidates(filename))
+        date = self._find_in_tag(candidates, 'CreateDate')
+        if date:
+            return date
+        return self._find_in_tag(candidates, 'FileModifyDate')
 
 
 def creation_date(filename):

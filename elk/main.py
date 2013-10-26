@@ -10,6 +10,7 @@ Usage:
     elk optimize:mov
     elk captions
     elk captions:fix
+    elk names:fix
     elk cover <photo>
     elk -h|--help
     elk --version
@@ -23,6 +24,7 @@ Options:
     optimize:mov        Optimizes all videos in current directory.
     captions            Print all captions in current directory.
     captions:fix        Fix all captions in current directory.
+    names:fix           Fix all filenames in current directory.
     cover               Set given photo as cover photo.
     -h --help           Show this screen.
     --version           Show elk version.
@@ -40,6 +42,7 @@ command_map = {
     'captions': 'elk.captions.captions',
     'captions:fix': 'elk.captions.captions_fix',
     'captions:edit': 'elk.captions.captions_edit',
+    'names:fix': 'elk.names.names_fix',
 }
 
 

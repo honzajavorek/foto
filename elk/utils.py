@@ -9,7 +9,8 @@ system_encoding = sys.getfilesystemencoding()
 
 
 def list_files(directory, exts=None, recursive=False):
-    exts = frozenset('.' + ext.lstrip('.') for ext in exts)
+    if exts is not None:
+        exts = frozenset('.' + ext.lstrip('.') for ext in exts)
 
     def list_dir(directory):
         for basename in os.listdir(directory):

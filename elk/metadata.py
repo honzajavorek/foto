@@ -16,22 +16,33 @@ class Metadata(object):
 
     _tag_re = re.compile(r'^[^:]+:\s*')
     _datetime_re = re.compile(
-        r'^\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}([\-+]\d{2}:\d{2})?$'
+        r'^(\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?)([\-+]\d{2}:\d{2})?$'
     )
 
     def __init__(self, filename):
         self.filename = filename
 
     def _to_datetime(self, s):
-        if s.startswith('0000:00:00 00:00:00'):
+        if s.startswith('0000:00:00'):
             return None
-        dt = datetime.strptime(s[:19], '%Y:%m:%d %H:%M:%S')
-        if s[19:]:
-            # convert to UTC
-            op = int('{0}1'.format(s[19]))
-            offset = timedelta(minutes=int(s[20:22]), hours=int(s[23:25]))
-            return (dt - (op * offset)).replace(tzinfo=pytz.utc)
-        return dt
+        dt_fmt = '%Y:%m:%d %H:%M:%S'
+
+        if len(s) > 19:
+            match = self._datetime_re.search(s)
+            dt_base = match.group(1)
+            tz = match.group(3)
+
+            if len(dt_base) > 19:
+                dt_fmt += '.%f'
+            dt = datetime.strptime(dt_base, dt_fmt)
+
+            if tz:
+                # convert to UTC
+                op = int('{0}1'.format(tz[0]))
+                offset = timedelta(minutes=int(tz[1:3]), hours=int(tz[4:6]))
+                return (dt - (op * offset)).replace(tzinfo=pytz.utc)
+            return dt
+        return datetime.strptime(s, dt_fmt)
 
     def _from_datetime(self, dt):
         if dt.tzinfo is not None:
