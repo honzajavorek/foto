@@ -8,7 +8,7 @@ from elk.metadata import Metadata
 
 
 def captions(directory):
-    for filename in list_files(directory, ext='jpg'):
+    for filename in list_files(directory, exts=['jpg']):
         basename = os.path.basename(filename)
 
         meta = Metadata(filename)
@@ -18,7 +18,7 @@ def captions(directory):
 
 
 def captions_fix(directory):
-    for filename in list_files(directory, ext='jpg'):
+    for filename in list_files(directory, exts=['jpg']):
         basename = os.path.basename(filename)
 
         meta = Metadata(filename)

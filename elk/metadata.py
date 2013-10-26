@@ -2,6 +2,10 @@
 
 
 import re
+from datetime import timedelta, datetime
+
+import pytz
+import times
 from sh import exiftool
 
 
@@ -11,9 +15,28 @@ class Metadata(object):
     """
 
     _tag_re = re.compile(r'^[^:]+:\s*')
+    _datetime_re = re.compile(
+        r'^\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}([\-+]\d{2}:\d{2})?$'
+    )
 
     def __init__(self, filename):
         self.filename = filename
+
+    def _to_datetime(self, s):
+        if s.startswith('0000:00:00 00:00:00'):
+            return None
+        dt = datetime.strptime(s[:19], '%Y:%m:%d %H:%M:%S')
+        if s[19:]:
+            # convert to UTC
+            op = int('{0}1'.format(s[19]))
+            offset = timedelta(minutes=int(s[20:22]), hours=int(s[23:25]))
+            return (dt - (op * offset)).replace(tzinfo=pytz.utc)
+        return dt
+
+    def _from_datetime(self, dt):
+        if dt.tzinfo is not None:
+            dt = times.from_local(dt)
+        return dt.strftime('%Y:%m:%d %H:%M:%S+00:00')
 
     def __getitem__(self, tag):
         tag_opt = '-' + tag
@@ -32,6 +55,9 @@ class Metadata(object):
             output = unicode(output, 'utf8')
 
         tag = self._tag_re.sub('', output).strip() or None
+
+        if tag and self._datetime_re.match(tag):
+            return self._to_datetime(tag)
         return tag
 
     def get(self, tag, default):
@@ -40,7 +66,14 @@ class Metadata(object):
         return default
 
     def __setitem__(self, tag, content):
-        content = '' if content is None else unicode(content)
+        if content:
+            if isinstance(content, datetime):
+                content = self._from_datetime(content)
+            else:
+                content = unicode(content)
+        else:
+            content = ''
+
         tag_opt = u"-{tag}={content}".format(tag=tag, content=content)
 
         exiftool(self.filename, '-charset', 'iptc=UTF8',
