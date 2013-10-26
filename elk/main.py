@@ -4,35 +4,26 @@
 """Elk.
 
 Usage:
-    elk organize
-    elk upload
-    elk sync
+    elk arrange
     elk optimize
     elk optimize:jpg
     elk optimize:mov
-    elk panorama
-    elk info
-    elk info:edit
     elk captions
     elk captions:fix
+    elk cover <photo>
     elk -h|--help
     elk --version
 
 Options:
-    organize            Take all mess in current directory and place
+    arrange             Take all mess in current directory and place
                         it into directories where each of them represents
                         a single day.
-    upload              Upload current directory to remote storages.
-    sync                Synchronize captions and info in current directory
-                        with remote storages.
     optimize            Optimizes all photos and videos in current directory.
     optimize:jpg        Optimizes all photos in current directory.
     optimize:mov        Optimizes all videos in current directory.
-    panorama            Detect and convert all panoramas in current directory.
-    info                Print current directory info.
-    info:edit           Edit current directory info.
     captions            Print all captions in current directory.
     captions:fix        Fix all captions in current directory.
+    cover               Set given photo as cover photo.
     -h --help           Show this screen.
     --version           Show elk version.
 """
@@ -45,6 +36,7 @@ from elk import __version__
 
 
 command_map = {
+    'arrange': 'elk.arrange.arrange',
     'captions': 'elk.captions.captions',
     'captions:fix': 'elk.captions.captions_fix',
     'captions:edit': 'elk.captions.captions_edit',
