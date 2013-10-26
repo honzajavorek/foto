@@ -1,7 +1,8 @@
 libimage-exiftool-perl
-libmagickwand-dev
 ffmpeg
 libavcodec-extra-53
 libx264-120
 libx264-dev
 x264
+libnotify4
+python-gobject
