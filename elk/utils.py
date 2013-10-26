@@ -23,3 +23,13 @@ def list_files(directory, exts=None, recursive=False):
             yield filename
 
     return sorted(list_dir(directory))
+
+
+def season(d):
+    if 3 <= d.month <= 5:
+        return u'jaro'
+    if 6 <= d.month <= 8:
+        return u'léto'
+    if 9 <= d.month <= 11:
+        return u'podzim'
+    return 'zima'
