@@ -6,16 +6,16 @@ import os
 
 from elk import config
 from elk.utils import list_files, season
-from elk.creation_date import creation_date
+from elk.creation_datetime import creation_datetime
 
 
 def arrange(directory):
     dir_mode = os.stat(directory).st_mode
-    exts = re.split(r'[,\s]+', config.get('arrange', 'exts'))
+    exts = re.split(r'[,\s]+', config.get('manipulation', 'exts'))
 
     for filename in list_files(directory, exts=exts, recursive=True):
         basename = os.path.basename(filename)
-        date = creation_date(filename)
+        date = creation_datetime(filename).date()
 
         # create new directory with date and season hint
         new_dir_basename = u'{0:%Y-%m-%d} {1}'.format(date, season(date))

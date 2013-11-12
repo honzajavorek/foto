@@ -7,7 +7,7 @@ import re
 from elk.metadata import Metadata
 
 
-class _CreationDateResolver(object):
+class _CreationDateTimeResolver(object):
 
     _numeric_re = re.compile(r'^(\D*)(\d+)$')
 
@@ -32,16 +32,16 @@ class _CreationDateResolver(object):
                 meta = Metadata(candidate)
                 dt = meta[tag]
                 if dt:
-                    return dt.date()
+                    return dt
         return None
 
     def resolve(self, filename):
         candidates = list(self._gen_candidates(filename))
-        date = self._find_in_tag(candidates, 'CreateDate')
-        if date:
-            return date
+        dt = self._find_in_tag(candidates, 'CreateDate')
+        if dt:
+            return dt
         return self._find_in_tag(candidates, 'FileModifyDate')
 
 
-def creation_date(filename):
-    return _CreationDateResolver().resolve(filename)
+def creation_datetime(filename):
+    return _CreationDateTimeResolver().resolve(filename)

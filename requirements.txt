@@ -3,3 +3,5 @@ sh==1.05
 send2trash==1.2.0
 times==0.6.2
 pytz==2013d
+
+# do not forget --system-site-packages when creating your virtualenv
