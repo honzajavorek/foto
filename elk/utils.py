@@ -5,6 +5,7 @@ import os
 import sys
 
 from gi.repository import Notify
+from send2trash import send2trash
 
 
 system_encoding = sys.getfilesystemencoding()
@@ -42,3 +43,13 @@ def notify(name, message):
     Notify.init(name)
     n = Notify.Notification.new(name, message, 'dialog-information')
     n.show()
+
+
+def to_trash(filename):
+    try:
+        send2trash(filename)
+    except OSError as e:
+        if e.errno == 13:  # permission denied
+            os.remove(filename)
+        else:
+            raise

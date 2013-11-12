@@ -11,7 +11,7 @@ from elk.creation_datetime import creation_datetime
 
 def arrange(directory):
     dir_mode = os.stat(directory).st_mode
-    exts = re.split(r'[,\s]+', config.get('manipulation', 'exts'))
+    exts = re.split(r'[,\s]+', config.get('filenames', 'media_exts'))
 
     for filename in list_files(directory, exts=exts, recursive=True):
         basename = os.path.basename(filename)

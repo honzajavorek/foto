@@ -8,10 +8,9 @@ import shlex
 from time import time
 
 from sh import avconv
-from send2trash import send2trash
 
 from elk import config
-from elk.utils import list_files, notify
+from elk.utils import list_files, notify, to_trash
 
 
 def optimize(directory):
@@ -58,7 +57,7 @@ def convert_multimedia(original_filename, output_ext, params=None):
 
     # trash the original file
     try:
-        send2trash(original_filename)
+        to_trash(original_filename)
     except OSError:
         pass  # permission denied
 
