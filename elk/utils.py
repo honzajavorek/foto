@@ -46,6 +46,8 @@ def notify(name, message):
 
 
 def to_trash(filename):
+    if isinstance(filename, unicode):
+        filename = filename.encode(system_encoding)
     try:
         send2trash(filename)
     except OSError as e:
