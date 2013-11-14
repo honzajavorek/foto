@@ -9,6 +9,7 @@ Usage:
     elk convert [-r]
     elk convert:jpg [-r]
     elk convert:mov [-r]
+    elk convert:amr [-r]
     elk captions [-r]
     elk captions:fix [-r]
     elk names:fix [-r]
@@ -25,7 +26,8 @@ Options:
                         in current directory.
     convert             Converts all photos and videos in current directory.
     convert:jpg         Optimizes all JPG photos in current directory.
-    convert:mov         Converts all MOV videos in current directory.
+    convert:mov         Converts all MOV videos to AVIs in current directory.
+    convert:amr         Converts all AMR sounds to MP3s in current directory.
     captions            Print all captions in current directory.
     captions:fix        Fix all captions in current directory.
     names:fix           Fix all filenames in current directory.
@@ -50,7 +52,9 @@ command_map = {
     'arrange': 'elk.arrange.arrange',
     'auto': 'elk.auto.auto',
     'convert': 'elk.convert.convert',
+    'convert:jpg': 'elk.convert.convert_jpg',
     'convert:mov': 'elk.convert.convert_mov',
+    'convert:amr': 'elk.convert.convert_amr',
     'captions': 'elk.captions.captions',
     'captions:fix': 'elk.captions.captions_fix',
     'captions:edit': 'elk.captions.captions_edit',

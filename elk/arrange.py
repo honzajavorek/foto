@@ -10,7 +10,7 @@ from elk.utils import list_files, season, creation_datetime
 
 def arrange(directory):
     dir_mode = os.stat(directory).st_mode
-    exts = re.split(r'[,\s]+', config.get('filenames', 'media_exts'))
+    exts = re.split(r'[,\s]+', config.get('general', 'media_exts'))
 
     for filename in list_files(directory, exts=exts, recursive=True):
         basename = os.path.basename(filename)
@@ -26,7 +26,7 @@ def arrange(directory):
                 raise
 
         # create arrange file with index of moved files
-        index_basename = config.get('arrange', 'index_basename')
+        index_basename = config.get('general', 'index_basename')
         index_filename = os.path.join(new_dir_filename, index_basename)
         with open(index_filename, 'a') as f:
             f.write(u"{0}\n".format(filename).encode('utf-8'))

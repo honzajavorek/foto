@@ -13,7 +13,7 @@ from elk.names import names_fix, names_sort
 
 def auto(directory):
     print "Removing rubbish..."
-    rubbish_names = re.split(r'[,\s]+', config.get('filenames', 'rubbish'))
+    rubbish_names = re.split(r'[,\s]+', config.get('general', 'rubbish'))
     for filename in list_files(directory):
         basename = os.path.basename(filename)
         if basename in rubbish_names:

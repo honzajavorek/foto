@@ -4,6 +4,7 @@
 import os
 import re
 import sys
+import shlex
 
 from gi.repository import Notify
 from send2trash import send2trash
@@ -12,6 +13,15 @@ from elk.metadata import Metadata
 
 
 system_encoding = sys.getfilesystemencoding()
+
+
+def parse_cmd_args(s, **wildcards):
+    if not isinstance(s, unicode):
+        s = unicode(s)
+    s = s.format(**wildcards)
+    s = s.encode(system_encoding)
+    args = shlex.split(s)
+    return [arg.decode(system_encoding) for arg in args]
 
 
 def list_dirs(directory):
@@ -58,13 +68,7 @@ def notify(name, message):
 def to_trash(filename):
     if isinstance(filename, unicode):
         filename = filename.encode(system_encoding)
-    try:
-        send2trash(filename)
-    except OSError as e:
-        if e.errno == 13:  # permission denied
-            os.remove(filename)
-        else:
-            raise
+    send2trash(filename)
 
 
 class _CreationDateTimeResolver(object):

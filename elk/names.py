@@ -23,7 +23,7 @@ def names_fix(directory):
 
 
 def names_sort(directory):
-    exts = re.split(r'[,\s]+', config.get('filenames', 'media_exts'))
+    exts = re.split(r'[,\s]+', config.get('general', 'media_exts'))
 
     unsorted_filenames = list_files(directory, exts=exts)
 
