@@ -5,7 +5,7 @@ import re
 import os
 
 from elk import config
-from elk.optimize import optimize
+from elk.convert import convert
 from elk.captions import captions_fix
 from elk.utils import list_files, to_trash
 from elk.names import names_fix, names_sort
@@ -29,4 +29,4 @@ def auto(directory):
     print "Fixing captions..."
 
     captions_fix(directory)
-    optimize(directory)
+    convert(directory)

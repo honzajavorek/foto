@@ -6,3 +6,10 @@ libx264-dev
 x264
 libnotify4
 python-gobject-dev
+libjpeg8
+libjpeg62
+libjpeg-dev
+libfreetype6
+libfreetype6-dev
+zlib1g-dev
+libmagickwand-dev

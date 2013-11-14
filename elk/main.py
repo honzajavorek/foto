@@ -5,15 +5,15 @@
 
 Usage:
     elk arrange
-    elk auto
-    elk optimize
-    elk optimize:jpg
-    elk optimize:mov
-    elk captions
-    elk captions:fix
-    elk names:fix
-    elk names:sort
-    elk cover <photo>
+    elk auto [-r]
+    elk convert [-r]
+    elk convert:jpg [-r]
+    elk convert:mov [-r]
+    elk captions [-r]
+    elk captions:fix [-r]
+    elk names:fix [-r]
+    elk names:sort [-r]
+    elk cover <photo> [-r]
     elk -h|--help
     elk --version
 
@@ -23,15 +23,17 @@ Options:
                         a single day.
     auto                Does all standard operations with photos and videos
                         in current directory.
-    optimize            Optimizes all photos and videos in current directory.
-    optimize:jpg        Optimizes all photos in current directory.
-    optimize:mov        Optimizes all videos in current directory.
+    convert             Converts all photos and videos in current directory.
+    convert:jpg         Optimizes all JPG photos in current directory.
+    convert:mov         Converts all MOV videos in current directory.
     captions            Print all captions in current directory.
     captions:fix        Fix all captions in current directory.
     names:fix           Fix all filenames in current directory.
     names:sort          Rename all files in current directory so they are
                         sorted by date & time.
     cover               Set given photo as cover photo.
+    -r                  Perform given command for each album in current
+                        directory.
     -h --help           Show this screen.
     --version           Show elk version.
 """
@@ -41,13 +43,14 @@ import os
 from docopt import docopt
 
 from elk import __version__
+from elk.utils import list_dirs
 
 
 command_map = {
     'arrange': 'elk.arrange.arrange',
     'auto': 'elk.auto.auto',
-    'optimize': 'elk.optimize.optimize',
-    'optimize:mov': 'elk.optimize.optimize_mov',
+    'convert': 'elk.convert.convert',
+    'convert:mov': 'elk.convert.convert_mov',
     'captions': 'elk.captions.captions',
     'captions:fix': 'elk.captions.captions_fix',
     'captions:edit': 'elk.captions.captions_edit',
@@ -75,11 +78,18 @@ def import_command(full_name):
 def main():
     """Handles parsing of arguments and execution of command."""
     args = parse_args()
-    directory = os.getcwdu()
+
+    if '-r' in args:
+        args.remove('-r')
+        dirs = list_dirs(os.getcwdu())
+    else:
+        dirs = [os.getcwdu()]
 
     cmd = import_command(command_map[args[0]])
     try:
-        cmd(directory, *args[1:])
+        for directory in dirs:
+            print 'DIRECTORY:', os.path.basename(directory)
+            cmd(directory, *args[1:])
     except KeyboardInterrupt:
         pass
 

@@ -11,6 +11,13 @@ from send2trash import send2trash
 system_encoding = sys.getfilesystemencoding()
 
 
+def list_dirs(directory):
+    filenames = (os.path.join(directory, basename) for basename
+                 in os.listdir(directory))
+    return sorted(filename for filename
+                  in filenames if os.path.isdir(filename))
+
+
 def list_files(directory, exts=None, recursive=False):
     if exts is not None:
         exts = frozenset('.' + ext.lstrip('.') for ext in exts)
