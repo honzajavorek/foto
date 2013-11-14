@@ -5,8 +5,7 @@ import re
 import os
 
 from elk import config
-from elk.utils import list_files, season
-from elk.creation_datetime import creation_datetime
+from elk.utils import list_files, season, creation_datetime
 
 
 def arrange(directory):

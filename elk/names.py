@@ -5,8 +5,7 @@ import os
 import re
 
 from elk import config
-from elk.utils import list_files
-from elk.creation_datetime import creation_datetime
+from elk.utils import list_files, creation_datetime
 
 
 def names_fix(directory):
@@ -27,6 +26,12 @@ def names_sort(directory):
     exts = re.split(r'[,\s]+', config.get('filenames', 'media_exts'))
 
     unsorted_filenames = list_files(directory, exts=exts)
+
+    all_prefixed = all(re.match(r'\d+\-', os.path.basename(filename))
+                       for filename in unsorted_filenames)
+    if all_prefixed:
+        return  # probably already sorted, keep manual changes
+
     filenames = sorted(
         unsorted_filenames,
         key=lambda filename: creation_datetime(filename)

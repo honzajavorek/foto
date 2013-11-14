@@ -1,7 +1,5 @@
 docopt==0.5.0
 sh==1.05
 send2trash==1.3.0
-times==0.6.2
-pytz==2013d
 
 # do not forget --system-site-packages when creating your virtualenv

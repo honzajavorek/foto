@@ -2,9 +2,8 @@
 
 
 import re
-from datetime import timedelta, datetime
+from datetime import datetime
 
-import pytz
 import times
 from sh import exiftool
 
@@ -25,24 +24,9 @@ class Metadata(object):
     def _to_datetime(self, s):
         if s.startswith('0000:00:00'):
             return None
-        dt_fmt = '%Y:%m:%d %H:%M:%S'
-
-        if len(s) > 19:
-            match = self._datetime_re.search(s)
-            dt_base = match.group(1)
-            tz = match.group(3)
-
-            if len(dt_base) > 19:
-                dt_fmt += '.%f'
-            dt = datetime.strptime(dt_base, dt_fmt)
-
-            if tz:
-                # convert to UTC
-                op = int('{0}1'.format(tz[0]))
-                offset = timedelta(minutes=int(tz[1:3]), hours=int(tz[4:6]))
-                return (dt - (op * offset)).replace(tzinfo=pytz.utc)
-            return dt
-        return datetime.strptime(s, dt_fmt)
+        # strip off the timezone information so we always get
+        # tz-unaware local time
+        return datetime.strptime(s[:19], '%Y:%m:%d %H:%M:%S')
 
     def _from_datetime(self, dt):
         if dt.tzinfo is not None:
