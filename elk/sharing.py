@@ -36,4 +36,8 @@ def share(directory):
 
 
 def unshare(directory):
-    os.unlink(dropbox_dir(directory))
+    try:
+        os.unlink(dropbox_dir(directory))
+    except OSError as e:
+        if e.errno != 2:  # no such directory
+            raise
