@@ -3,6 +3,7 @@
 
 import re
 import os
+import shutil
 import urllib
 
 from elk import config
@@ -26,7 +27,7 @@ def dropbox_path(directory):
 
 def share(directory):
     try:
-        os.symlink(directory, dropbox_dir(directory))
+        shutil.copytree(directory, dropbox_dir(directory))
     except OSError as e:
         if e.errno != 17:  # already exists
             raise
@@ -37,7 +38,7 @@ def share(directory):
 
 def unshare(directory):
     try:
-        os.unlink(dropbox_dir(directory))
+        shutil.rmtree(dropbox_dir(directory))
     except OSError as e:
         if e.errno != 2:  # no such directory
             raise
