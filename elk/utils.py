@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import shlex
+import pipes
 
 from gi.repository import Notify
 from send2trash import send2trash
@@ -18,6 +19,12 @@ system_encoding = sys.getfilesystemencoding()
 def parse_cmd_args(s, **wildcards):
     if not isinstance(s, unicode):
         s = unicode(s)
+
+    wildcards = {
+        wildcard: pipes.quote(value) for
+        (wildcard, value) in wildcards.items()
+    }
+
     s = s.format(**wildcards)
     s = s.encode(system_encoding)
     args = shlex.split(s)
