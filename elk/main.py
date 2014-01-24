@@ -15,6 +15,8 @@ Usage:
     elk names:fix [-r]
     elk names:sort [-r]
     elk cover <photo> [-r]
+    elk share
+    elk unshare
     elk -h|--help
     elk --version
 
@@ -34,6 +36,8 @@ Options:
     names:sort          Rename all files in current directory so they are
                         sorted by date & time.
     cover               Set given photo as cover photo.
+    share               Shares the album on Dropbox.
+    unshare             Unshares the album on Dropbox.
     -r                  Perform given command for each album in current
                         directory.
     -h --help           Show this screen.
@@ -60,6 +64,8 @@ command_map = {
     'captions:edit': 'elk.captions.captions_edit',
     'names:fix': 'elk.names.names_fix',
     'names:sort': 'elk.names.names_sort',
+    'share': 'elk.sharing.share',
+    'unshare': 'elk.sharing.unshare',
 }
 
 
