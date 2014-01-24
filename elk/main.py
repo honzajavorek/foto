@@ -4,19 +4,19 @@
 """Elk.
 
 Usage:
-    elk arrange
-    elk auto [-r]
-    elk convert [-r]
-    elk convert:jpg [-r]
-    elk convert:mov [-r]
-    elk convert:amr [-r]
-    elk captions [-r]
-    elk captions:fix [-r]
-    elk names:fix [-r]
-    elk names:sort [-r]
-    elk cover <photo> [-r]
-    elk share
-    elk unshare
+    elk arrange [-d DIR | --dir=DIR]
+    elk auto [-r] [-d DIR | --dir=DIR]
+    elk convert [-r] [-d DIR | --dir=DIR]
+    elk convert:jpg [-r] [-d DIR | --dir=DIR]
+    elk convert:mov [-r] [-d DIR | --dir=DIR]
+    elk convert:amr [-r] [-d DIR | --dir=DIR]
+    elk captions [-r] [-d DIR | --dir=DIR]
+    elk captions:fix [-r] [-d DIR | --dir=DIR]
+    elk names:fix [-r] [-d DIR | --dir=DIR]
+    elk names:sort [-r] [-d DIR | --dir=DIR]
+    elk cover <photo> [-r] [-d DIR | --dir=DIR]
+    elk share [-d DIR]
+    elk unshare [-d DIR]
     elk -h|--help
     elk --version
 
@@ -40,12 +40,15 @@ Options:
     unshare             Unshares the album on Dropbox.
     -r                  Perform given command for each album in current
                         directory.
+    -d DIR, --dir=DIR   Uses given directory instead of current directory.
     -h --help           Show this screen.
     --version           Show elk version.
 """
 
 
 import os
+import sys
+
 from docopt import docopt
 
 from elk import __version__
@@ -72,9 +75,19 @@ command_map = {
 def parse_args():
     """Parses arguments and returns them in a list."""
     args = docopt(__doc__, version=__version__)
+
+    base_dir = args.pop('--dir', args.pop('-d', os.getcwdu()))
+    base_dir = os.path.realpath(base_dir).decode(sys.getfilesystemencoding())
+
+    if args.get('-r'):
+        args.pop('-r')
+        dirs = list_dirs(base_dir)
+    else:
+        dirs = [base_dir]
+
     args = [cmd for (cmd, is_present) in
             args.items() if is_present]  # keep only names of truthy args
-    return args
+    return args, dirs
 
 
 def import_command(full_name):
@@ -87,14 +100,7 @@ def import_command(full_name):
 
 def main():
     """Handles parsing of arguments and execution of command."""
-    args = parse_args()
-
-    if '-r' in args:
-        args.remove('-r')
-        dirs = list_dirs(os.getcwdu())
-    else:
-        dirs = [os.getcwdu()]
-
+    args, dirs = parse_args()
     cmd = import_command(command_map[args[0]])
     try:
         for directory in dirs:
