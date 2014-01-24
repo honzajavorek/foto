@@ -65,13 +65,18 @@ def convert_multimedia(filename):
     command(*args, **kwargs)
     t = time() - start
 
-    # trash the original file, move result
-    to_trash(names.in_filename)
-    shutil.move(tmp_filename, names.out_filename)
-
     # calculate statistics, etc.
     out_size = os.path.getsize(names.out_filename) / 1024 / 1024  # MB
     compression = 100 - (100 * out_size / in_size)
+
+    # trash the original file, move result
+    if in_ext == out_ext and in_size <= out_size:
+        # converting within the same format and the conversion had no
+        # possitive effect => we can keep the original
+        os.unlink(tmp_filename)
+    else:
+        to_trash(names.in_filename)
+        shutil.move(tmp_filename, names.out_filename)
 
     # print summary
     line = u'{0}: {1:.1f}MB → {2} {3:.1f}MB, {4:.1f}min, {5:.1f}%'.format(
