@@ -76,7 +76,7 @@ def parse_args():
     """Parses arguments and returns them in a list."""
     args = docopt(__doc__, version=__version__)
 
-    base_dir = args.pop('--dir', args.pop('-d', os.getcwdu()))
+    base_dir = args.pop('--dir') or os.getcwdu()
     base_dir = os.path.realpath(base_dir).decode(sys.getfilesystemencoding())
 
     if args.get('-r'):
