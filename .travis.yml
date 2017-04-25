@@ -3,6 +3,10 @@ language: "python"
 python:
   - "3.5"
 cache: "pip"
+addons:
+  apt:
+    packages:
+      - libimage-exiftool-perl
 env:
   global:  # 'travis encrypt PYPI_PASSWORD=... GH_TOKEN=...'
     - PYPI_USERNAME=honzajavorek
