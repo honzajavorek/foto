@@ -2,7 +2,11 @@ import os
 import shlex
 import pipes
 
-import pync
+try:
+    import pync
+except:
+    pync = None
+
 from plumbum.cmd import file as file_cmd
 from send2trash import send2trash as to_trash
 
@@ -56,4 +60,5 @@ def is_corrupted_file(filename):
 
 
 def notify(name, message):
-    pync.Notifier.notify(message, title=name)
+    if pync:
+        pync.Notifier.notify(message, title=name)
