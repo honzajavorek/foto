@@ -7,7 +7,7 @@ try:
     setup_hook(sys.argv)
 except ImportError:
     message = "Unable to locate 'semantic_release', releasing won't work"
-print(message, file=sys.stderr)
+    print(message, file=sys.stderr)
 
 
 version = '1.0.0'
