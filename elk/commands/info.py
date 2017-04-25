@@ -87,28 +87,28 @@ def restore_from_feed_rss(logger, filename):
         xml = etree.parse(f)
 
     info = {
-        'title': xpath_get_first_as_text(xml, '/rss/channel/title'),
-        'description': xpath_get_first_as_text(xml, '/rss/channel/description'),
+        'title': xpath_first_as_text(xml, '/rss/channel/title'),
+        'description': xpath_first_as_text(xml, '/rss/channel/description'),
     }
 
-    value = xpath_get_first_as_text(xml, '/rss/channel/gphoto:location')
+    value = xpath_first_as_text(xml, '/rss/channel/gphoto:location')
     if value:
         info['locations'] = [value]
-    value = xpath_get_first_as_text(xml, '/rss/channel/georss:where//gml:pos')
+    value = xpath_first_as_text(xml, '/rss/channel/georss:where//gml:pos')
     if value:
         lat, lng = value.split(' ')
         info['coords'] = {'lat': float(lat), 'lng': float(lng)}
 
     logger.log('Looking for photo details')
     for item_xml in xml.xpath('/rss/channel/item'):
-        title = xpath_get_first_as_text(item_xml, 'title')
+        title = xpath_first_as_text(item_xml, 'title')
         if title:
             photo_filename = os.path.join(directory, title)
-            photo_caption = xpath_get_first_as_text(item_xml, 'description')
+            photo_caption = xpath_first_as_text(item_xml, 'description')
             save_photo_caption(logger, photo_filename, photo_caption)
 
 
-def xpath_get_first_as_text(xml, query):
+def xpath_first_as_text(xml, query):
     results = xml.xpath(query, namespaces={
         'gphoto': 'http://schemas.google.com/photos/2007',
         'gml': 'http://www.opengis.net/gml',
@@ -126,7 +126,7 @@ def xpath_get_first_as_text(xml, query):
             return None
 
 
-def restore_from_picasa_ini(filename):
+def restore_from_picasa_ini(logger, filename):
     directory = os.path.dirname(filename)
 
     ini = configparser.ConfigParser()

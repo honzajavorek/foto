@@ -1,5 +1,3 @@
-import os
-
 from elk.logger import Logger
 from elk.commands.convert import convert
 from elk.commands.clean import clean

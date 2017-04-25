@@ -30,8 +30,9 @@ class Metadata(object):
     )
 
     _correct_encoding_re = re.compile(
-        r'^[\w\s' + re.escape(string.punctuation) + r']+$'
-    , re.U)
+        r'^[\w\s' + re.escape(string.punctuation) + r']+$',
+        re.U
+    )
     _incorrect_encoding_char_mapping = {
         frozenset(['ř', 'ø']): 'ř',
         frozenset(['ě', 'ì']): 'ě',
@@ -90,7 +91,7 @@ class Metadata(object):
         values_details = [
             {
                 'value': value,
-                'has_correct_encoding': bool(self._correct_encoding_re.search(value)),
+                'has_correct_encoding': bool(self._correct_encoding_re.search(value)),  # NOQA
                 'length': len(value),
             }
             for value in values
@@ -102,7 +103,10 @@ class Metadata(object):
             if details['has_correct_encoding']
         ]
         if not len(values_details):
-            raise RuntimeError('The Metadata._correct_encoding_re RE resulted in false positive')
+            raise RuntimeError(
+                'The Metadata._correct_encoding_re RE '
+                'resulted in false positive'
+            )
         if len(values_details) == 1:
             return values_details[0]['value']
 

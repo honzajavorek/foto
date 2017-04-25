@@ -16,13 +16,13 @@ def captions(directory):
         basename = os.path.basename(filename)
 
         meta = Metadata(filename)
-        basename_formatted = click.style('{}'.format(basename), bold=True)
+        basename_fmt = click.style('{}'.format(basename), bold=True)
 
         try:
             caption = meta.get('Headline', meta['Caption-Abstract'])
-            logger.log('{}: {}'.format(basename_formatted, caption or ' - '))
+            logger.log('{}: {}'.format(basename_fmt, caption or ' - '))
         except FileFormatError:
-            logger.log('{}:  -  (not an image file)'.format(basename_formatted))
+            logger.log('{}:  -  (not an image file)'.format(basename_fmt))
 
 
 def captions_fix(directory):

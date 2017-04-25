@@ -62,9 +62,11 @@ def convert_video(directory):
             if options:
                 convert_multimedia(logger, filename, options)
             else:
-                logger.log("Unable to find configuration for '{}'".format(config_key))
+                message = "Unable to find configuration for '{}'"
+                logger.log(message.format(config_key))
         else:
-            logger.log("Unable to detect camera model of '{}'".format(os.path.basename(filename)))
+            message = "Unable to detect camera model of '{}'"
+            logger.log(message.format(os.path.basename(filename)))
 
 
 def detect_camera(filename):
@@ -104,10 +106,11 @@ def convert_multimedia(logger, filename, options):
         tmp_filename = f.name
 
     # arguments
-    args = parse_cmd_args(options['params'],
-        in_filename=names.in_filename,
-        out_filename=tmp_filename
-    )
+    wildcards = {
+        'in_filename': names.in_filename,
+        'out_filename': tmp_filename,
+    }
+    args = parse_cmd_args(options['params'], **wildcards)
     for arg in args:
         command = command[arg]  # binding arguments to the command
     if stdout:

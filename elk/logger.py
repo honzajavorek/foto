@@ -8,18 +8,22 @@ class Logger():
 
     def log(self, message):
         click.echo(
-            click.style(self.name + ' ', dim=True) +
-            message
+            click.style(self.name + ' ', dim=True)
+            + message
         )
 
     def warn(self, message):
-        click.echo(
-            click.style(self.name + ' ', dim=True) +
-            click.style(' {} '.format(message), bg='blue', fg='white', bold=True)
-        , err=True)
+        style = {'bg': 'blue', 'fg': 'white', 'bold': True}
+        message = (
+            click.style(self.name + ' ', dim=True)
+            + click.style(' {} '.format(message), **style)
+        )
+        click.echo(message, err=True)
 
     def err(self, message):
-        click.echo(
-            click.style(self.name + ' ', dim=True) +
-            click.style(' {} '.format(message), bg='red', fg='white', bold=True)
-        , err=True)
+        style = {'bg': 'red', 'fg': 'white', 'bold': True}
+        message = (
+            click.style(self.name + ' ', dim=True)
+            + click.style(' {} '.format(message), **style)
+        )
+        click.echo(message, err=True)

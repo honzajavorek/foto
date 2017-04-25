@@ -18,6 +18,7 @@ from .creation_datetime import creation_datetime
 __all__ = [
     'to_trash', 'Metadata', 'location', 'creation_datetime',
     'parse_cmd_args', 'list_dirs', 'list_files', 'notify',
+    'FileFormatError',
 ]
 
 

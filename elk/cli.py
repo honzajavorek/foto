@@ -39,10 +39,8 @@ def make_command(name, import_path, help):
 
         try:
             for directory in directories:
-                logger.log("🚀  Running command 'elk {}' for directory '{}'".format(
-                    name,
-                    directory,
-                ))
+                message = "🚀  Running command 'elk {}' for directory '{}'"
+                logger.log(message.format(name, directory))
                 implementation(directory, *args)
 
         except KeyboardInterrupt:

@@ -1,7 +1,6 @@
 import os
 
 from elk import config
-from elk.logger import Logger
 from elk.utils import list_files, creation_datetime, location
 
 
@@ -9,8 +8,6 @@ __all__ = ['arrange']
 
 
 def arrange(directory):
-    logger = Logger('arrange')
-
     dir_mode = os.stat(directory).st_mode
     exts = config['media_exts']
 

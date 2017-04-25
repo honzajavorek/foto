@@ -5,7 +5,7 @@ import click
 
 from elk import config
 from elk.logger import Logger
-from elk.utils import list_files, creation_datetime, FileFormatError
+from elk.utils import list_files, creation_datetime
 
 
 __all__ = ['names_fix', 'names_sort']
@@ -44,7 +44,10 @@ def names_sort(directory):
 
     datetimes = frozenset(map(creation_datetime, unsorted_filenames))
     if len(datetimes) < len(unsorted_filenames):
-        logger.err('Multiple files were created in the same time, sorting would create a mess')
+        logger.err(
+            'Multiple files were created in the same time, '
+            'sorting would create a mess'
+        )
         return
 
     filenames = sorted(unsorted_filenames, key=creation_datetime)
