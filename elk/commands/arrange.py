@@ -1,23 +1,30 @@
-# -*- coding: utf-8 -*-
-
-
-import re
 import os
 
 from elk import config
-from elk.utils import list_files, season, creation_datetime
+from elk.logger import Logger
+from elk.utils import list_files, creation_datetime, location
+
+
+__all__ = ['arrange']
 
 
 def arrange(directory):
+    logger = Logger('arrange')
+
     dir_mode = os.stat(directory).st_mode
-    exts = re.split(r'[,\s]+', config.get('general', 'media_exts'))
+    exts = config['media_exts']
 
     for filename in list_files(directory, exts=exts, recursive=True):
         basename = os.path.basename(filename)
-        date = creation_datetime(filename).date()
 
-        # create new directory with date and season hint
-        new_dir_basename = u'{0:%Y-%m-%d} {1}'.format(date, season(date))
+        # create new directory with date and location hint
+        date = creation_datetime(filename).date()
+        new_dir_basename = '{0:%Y-%m-%d}'.format(date)
+
+        loc = location(filename, **config['geocoding'])
+        if loc and loc.city:
+            new_dir_basename += ' {}, {}'.format(loc.city, loc.country)
+
         new_dir_filename = os.path.join(directory, new_dir_basename)
         try:
             os.makedirs(new_dir_filename, dir_mode)
@@ -26,18 +33,18 @@ def arrange(directory):
                 raise
 
         # create arrange file with index of moved files
-        index_basename = config.get('general', 'index_basename')
+        index_basename = config['index_basename']
         index_filename = os.path.join(new_dir_filename, index_basename)
         with open(index_filename, 'a') as f:
-            f.write(u"{0}\n".format(filename).encode('utf-8'))
+            f.write('{0}\n'.format(filename))
 
         # move
         new_filename = os.path.join(new_dir_filename, basename)
         filenames = [f.replace(directory, '').lstrip('/') for f
                      in [filename, new_filename]]
         if os.path.exists(new_filename):
-            print u'EXISTS! {0} → {1}'.format(*filenames)
+            print('EXISTS! {0} → {1}'.format(*filenames))
             return
         else:
-            print u'{0} → {1}'.format(*filenames)
+            print('{0} → {1}'.format(*filenames))
             os.rename(filename, new_filename)

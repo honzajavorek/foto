@@ -1,0 +1,22 @@
+sudo: false
+language: "python"
+python:
+  - "3.5"
+cache: "pip"
+env:
+  global:  # 'travis encrypt PYPI_PASSWORD=... GH_TOKEN=...'
+    - PYPI_USERNAME=honzajavorek
+    - secure: "CMJmw6PHnP1N23SOAfxTvVKL7kUY0wHC7HrrXml8PDU05wJDUrUplMye+ZDJLiQdiHCyIQGuhjDMh4WdgTT2afK3/0HNgk9EXRQ52AQL1Ruakj/2S+U7vFi6zAvALP1jdB2PitnFhviXDoyfovBQuNFG5vfCvCcyu5qm/aTsOMA="
+install:
+  - "pip install -e .[tests,release]"
+script:
+  - "flake8"
+  - "which elk"
+  - "elk --version"
+  - "elk --help"
+  - "py.test --cov-report="
+after_success:
+  - "coveralls"
+  - "git config user.name 'Honza Javorek'"
+  - "git config user.email 'mail@honzajavorek.cz'"
+  - "python setup.py publish"

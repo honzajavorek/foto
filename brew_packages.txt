@@ -1,0 +1,4 @@
+x264
+exiftool
+ffmpeg
+libjpeg

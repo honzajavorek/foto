@@ -1,41 +1,61 @@
-# -*- coding: utf-8 -*-
-
-
-import re
-import os
-
+import sys
 from setuptools import setup, find_packages
 
 
-base_path = os.path.dirname(__file__)
+try:
+    from semantic_release import setup_hook
+    setup_hook(sys.argv)
+except ImportError:
+    message = "Unable to locate 'semantic_release', releasing won't work"
+print(message, file=sys.stderr)
 
 
-# read requirements
-lines = open('requirements.txt').read().splitlines()
-install_requires = filter(None, [line.split('#')[0].strip() for line in lines])
+version = '1.0.0'
 
 
-# determine version
-code = open('elk/__init__.py', 'r').read(1000)
-version = re.search(r'__version__ = \'([^\']*)\'', code).group(1)
+install_requires = [
+    'plumbum',
+    'send2trash',
+    'pync',
+    'arrow',
+    'click',
+    'geocoder',
+    'pyaml',
+    'lxml',
+    'colorama',
+    'python-slugify',
+]
+tests_require = [
+    'pytest-runner',
+    'pytest',
+    'flake8',
+    'coveralls',
+    'pytest-cov',
+]
+release_requires = [
+    'python-semantic-release',
+]
 
 
 setup(
     name='elk',
     description='Command line photo manager',
-    long_description=__doc__,
+    long_description=open('README.rst').read(),
     version=version,
     author='Honza Javorek',
-    author_email='jan.javorek@gmail.com',
+    author_email='mail@honzajavorek.cz',
     url='https://github.com/honzajavorek/elk',
-    license='ISC',
-    packages=find_packages(exclude=['tests']),
+    license=open('LICENSE').read(),
+    packages=find_packages(),
     install_requires=install_requires,
+    tests_require=tests_require,
+    extras_require={
+        'tests': tests_require,
+        'release': release_requires,
+    },
     entry_points={
         'console_scripts': [
-            'elk = elk.main:main',
+            'elk = elk.cli:cli',
         ],
     },
-    include_package_data=True,
-    zip_safe=False
 )
