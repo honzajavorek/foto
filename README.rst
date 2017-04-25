@@ -10,7 +10,7 @@ Installation
 
 Only macOS and Python 3 are supported, beause that's what I currently use.
 
-:: code:: sh
+.. code:: sh
 
     $ git clone git@github.com:honzajavorek/elk.git
     $ cd elk
@@ -21,7 +21,7 @@ Only macOS and Python 3 are supported, beause that's what I currently use.
 
 Put ``.../env/bin/elk`` into your ``~/.bash_profile`` as an alias and you're done:
 
-:: code:: sh
+.. code:: sh
 
     $ echo 'alias elk=".../env/bin/elk"' >> ~/.bash_profile
 
