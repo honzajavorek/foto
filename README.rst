@@ -1,6 +1,8 @@
 foto
 ====
 
+|PyPI version| |Build Status|
+
 ``foto`` is **my personal** photo manager. I don't like tools pretending to be
 smarter than me. I like file-system based management and I couldn't find
 a folder-based manager which could do couple of simple tasks the way I want.
@@ -41,3 +43,8 @@ License: ISC
 
 This work is licensed under `ISC
 license <https://en.wikipedia.org/wiki/ISC_license>`__.
+
+.. |PyPI version| image:: https://badge.fury.io/py/foto.svg
+   :target: https://badge.fury.io/py/foto
+.. |Build Status| image:: https://travis-ci.org/honzajavorek/foto.svg?branch=master
+   :target: https://travis-ci.org/honzajavorek/foto
