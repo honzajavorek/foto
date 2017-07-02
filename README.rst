@@ -25,7 +25,7 @@ Your ``~/.bash_profile``:
 
 .. code:: sh
 
-    alias elk="/Users/honza/.../foto/env/bin/foto"
+    alias foto="/Users/honza/.../foto/env/bin/foto"
     export FOTO_GEOCODING_API_KEY='...'
 
 License: ISC
