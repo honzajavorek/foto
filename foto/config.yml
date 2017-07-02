@@ -11,7 +11,7 @@ yaml:
   default_style: ''
 
 geocoding:
-  # key: ELK_GEOCODING_API_KEY (taken from environment variable)
+  # key: FOTO_GEOCODING_API_KEY (taken from environment variable)
   language: cs
 
 converting:

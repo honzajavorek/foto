@@ -1,7 +1,7 @@
 import os
 
-from elk import config
-from elk.utils import list_files, creation_datetime, location
+from foto import config
+from foto.utils import list_files, creation_datetime, location
 
 
 __all__ = ['arrange']

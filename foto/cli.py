@@ -2,11 +2,11 @@ import os
 
 import click
 
-from elk.logger import Logger
-from elk.utils import list_dirs, FileFormatError
+from foto.logger import Logger
+from foto.utils import list_dirs, FileFormatError
 
 
-logger = Logger('elk')
+logger = Logger('foto')
 
 
 @click.group()
@@ -39,7 +39,7 @@ def make_command(name, import_path, help):
 
         try:
             for directory in directories:
-                message = "🚀  Running command 'elk {}' for directory '{}'"
+                message = "🚀  Running command 'foto {}' for directory '{}'"
                 logger.log(message.format(name, directory))
                 implementation(directory, *args)
 
@@ -60,63 +60,63 @@ def import_command(full_name):
 commands = [
     {
         'name': 'arrange',
-        'import_path': 'elk.commands.arrange.arrange',
+        'import_path': 'foto.commands.arrange.arrange',
         'help': ('Take all mess in directory and place it into subdirectories '
                  'according to metadata'),
     },
     {
         'name': 'auto',
-        'import_path': 'elk.commands.auto.auto',
+        'import_path': 'foto.commands.auto.auto',
         'help': 'Does all standard operations in directory',
     },
     {
         'name': 'clean',
-        'import_path': 'elk.commands.clean.clean',
+        'import_path': 'foto.commands.clean.clean',
         'help': 'Removes rubbish',
     },
     {
         'name': 'convert',
-        'import_path': 'elk.commands.convert.convert',
+        'import_path': 'foto.commands.convert.convert',
         'help': 'Converts all photos and videos in directory',
     },
     {
         'name': 'convert:images',
-        'import_path': 'elk.commands.convert.convert_images',
+        'import_path': 'foto.commands.convert.convert_images',
         'help': 'Optimizes all images in directory',
     },
     {
         'name': 'convert:video',
-        'import_path': 'elk.commands.convert.convert_video',
+        'import_path': 'foto.commands.convert.convert_video',
         'help': 'Converts and optimizes all videos in directory',
     },
     {
         'name': 'convert:audio',
-        'import_path': 'elk.commands.convert.convert_audio',
+        'import_path': 'foto.commands.convert.convert_audio',
         'help': 'Converts and optimizes all sounds to MP3s in directory',
     },
     {
         'name': 'captions',
-        'import_path': 'elk.commands.captions.captions',
+        'import_path': 'foto.commands.captions.captions',
         'help': 'Print all captions in directory',
     },
     {
         'name': 'captions:fix',
-        'import_path': 'elk.commands.captions.captions_fix',
+        'import_path': 'foto.commands.captions.captions_fix',
         'help': 'Fix all captions in directory',
     },
     {
         'name': 'names:fix',
-        'import_path': 'elk.commands.names.names_fix',
+        'import_path': 'foto.commands.names.names_fix',
         'help': 'Fix all filenames in directory',
     },
     {
         'name': 'names:sort',
-        'import_path': 'elk.commands.names.names_sort',
+        'import_path': 'foto.commands.names.names_sort',
         'help': 'Rename all files in directory to sort them by date & time',
     },
     {
         'name': 'info:restore',
-        'import_path': 'elk.commands.info.info_restore',
+        'import_path': 'foto.commands.info.info_restore',
         'help': ('Reads Picasa.ini, feed.rss, etc. to restore album info'
                  ' & captions, writes info.yml and metadata instead')
     }

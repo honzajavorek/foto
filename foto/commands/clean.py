@@ -2,9 +2,9 @@ import os
 
 import click
 
-from elk import config
-from elk.logger import Logger
-from elk.utils import list_files, to_trash, is_corrupted_file
+from foto import config
+from foto.logger import Logger
+from foto.utils import list_files, to_trash, is_corrupted_file
 
 
 __all__ = ['clean']

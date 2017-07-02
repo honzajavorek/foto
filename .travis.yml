@@ -1,12 +1,12 @@
 sudo: false
 language: "python"
 python:
-  - "3.5"
+  - "3.6"
 cache: "pip"
 addons:
   apt:
     packages:
-      - libimage-exiftool-perl
+      - "libimage-exiftool-perl"
 env:
   global:  # 'travis encrypt PYPI_PASSWORD=... GH_TOKEN=...'
     - PYPI_USERNAME=honzajavorek
@@ -15,9 +15,9 @@ install:
   - "pip install -e .[tests,release]"
 script:
   - "flake8"
-  - "which elk"
-  - "elk --version"
-  - "elk --help"
+  - "which foto"
+  - "foto --version"
+  - "foto --help"
   - "py.test --cov-report="
 after_success:
   - "coveralls"

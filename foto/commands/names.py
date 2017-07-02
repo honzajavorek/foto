@@ -3,9 +3,9 @@ import re
 
 import click
 
-from elk import config
-from elk.logger import Logger
-from elk.utils import list_files, creation_datetime
+from foto import config
+from foto.logger import Logger
+from foto.utils import list_files, creation_datetime
 
 
 __all__ = ['names_fix', 'names_sort']

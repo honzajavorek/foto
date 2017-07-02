@@ -2,8 +2,8 @@ import os
 
 import click
 
-from elk.logger import Logger
-from elk.utils import list_files, Metadata, FileFormatError
+from foto.logger import Logger
+from foto.utils import list_files, Metadata, FileFormatError
 
 
 __all__ = ['captions', 'captions_fix']

@@ -6,9 +6,9 @@ import click
 import yaml
 from lxml import etree
 
-from elk import config
-from elk.logger import Logger
-from elk.utils import list_files, Metadata
+from foto import config
+from foto.logger import Logger
+from foto.utils import list_files, Metadata
 
 
 __all__ = ['info_restore']

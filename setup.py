@@ -38,13 +38,13 @@ release_requires = [
 
 
 setup(
-    name='elk',
+    name='foto',
     description='Command line photo manager',
     long_description=open('README.rst').read(),
     version=version,
     author='Honza Javorek',
     author_email='mail@honzajavorek.cz',
-    url='https://github.com/honzajavorek/elk',
+    url='https://github.com/honzajavorek/foto',
     license=open('LICENSE').read(),
     packages=find_packages(),
     install_requires=install_requires,
@@ -55,7 +55,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'elk = elk.cli:cli',
+            'foto = foto.cli:cli',
         ],
     },
 )

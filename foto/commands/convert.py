@@ -8,9 +8,9 @@ from slugify import slugify
 import click
 from plumbum import local
 
-from elk import config
-from elk.logger import Logger
-from elk.utils import list_files, notify, to_trash, parse_cmd_args, Metadata
+from foto import config
+from foto.logger import Logger
+from foto.utils import list_files, notify, to_trash, parse_cmd_args, Metadata
 
 
 __all__ = ['convert', 'convert_images', 'convert_audio', 'convert_video']
