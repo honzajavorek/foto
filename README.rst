@@ -7,19 +7,10 @@ foto
 smarter than me. I like file-system based management and I couldn't find
 a folder-based manager which could do couple of simple tasks the way I want.
 
-Installation
-------------
-
-Only macOS and Python 3 are supported, beause that's what I currently use.
-
-.. code:: sh
-
-    $ pip install foto
-
-Also set ``FOTO_GEOCODING_API_KEY`` in your ``~/.bash_profile``.
-
 Development
 -----------
+
+Only macOS and Python 3 are supported, beause that's what I currently use.
 
 .. code:: sh
 
@@ -30,11 +21,12 @@ Development
     $ . ./env/bin/activate
     (env)$ pip install -e .
 
-Put ``.../env/bin/foto`` into your ``~/.bash_profile`` as an alias and you're done:
+Your ``~/.bash_profile``:
 
 .. code:: sh
 
-    $ echo 'alias foto=".../env/bin/foto"' >> ~/.bash_profile
+    alias elk="/Users/honza/.../foto/env/bin/foto"
+    export FOTO_GEOCODING_API_KEY='...'
 
 License: ISC
 ------------
