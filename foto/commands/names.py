@@ -42,15 +42,24 @@ def names_sort(directory):
         logger.log('Looks like already sorted')  # keep manual changes
         return
 
-    datetimes = frozenset(map(creation_datetime, unsorted_filenames))
-    if len(datetimes) < len(unsorted_filenames):
-        logger.err(
+    datetimes = list(map(creation_datetime, unsorted_filenames))
+    filenames_by_datetimes = list(zip(datetimes, unsorted_filenames))
+
+    if len(frozenset(datetimes)) < len(unsorted_filenames):
+        duplicities = ', '.join([
+            os.path.basename(filename)
+            for datetime, filename in filenames_by_datetimes
+            if datetimes.count(datetime) > 1
+        ])
+        logger.err((
             'Multiple files were created in the same time, '
-            'sorting would create a mess'
-        )
+            'automatic sorting would create mess: {}'
+        ).format(duplicities))
         return
 
-    filenames = sorted(unsorted_filenames, key=creation_datetime)
+    filenames = [
+        filename for datetime, filename in sorted(filenames_by_datetimes)
+    ]
     if filenames == unsorted_filenames:
         logger.log('Already sorted')
         return
