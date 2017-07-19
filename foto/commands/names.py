@@ -45,18 +45,6 @@ def names_sort(directory):
     datetimes = list(map(creation_datetime, unsorted_filenames))
     filenames_by_datetimes = list(zip(datetimes, unsorted_filenames))
 
-    if len(frozenset(datetimes)) < len(unsorted_filenames):
-        duplicities = ', '.join([
-            os.path.basename(filename)
-            for datetime, filename in filenames_by_datetimes
-            if datetimes.count(datetime) > 1
-        ])
-        logger.err((
-            'Multiple files were created in the same time, '
-            'automatic sorting would create mess: {}'
-        ).format(duplicities))
-        return
-
     filenames = [
         filename for datetime, filename in sorted(filenames_by_datetimes)
     ]
