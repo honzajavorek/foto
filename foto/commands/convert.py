@@ -50,7 +50,6 @@ def convert_multimedia_files(logger, directory, exts):
                 convert_multimedia(logger, filename, options)
             else:
                 logger.log("Unable to find configuration for '{}'".format(ext))
-            convert_multimedia(logger, filename, ext)
 
 
 def convert_video(directory):
