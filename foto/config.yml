@@ -25,14 +25,14 @@ converting:
     command: ffmpeg
     params: |
       -i {in_filename} -vcodec libx264 -crf 25.5 -acodec libmp3lame -ab 64k -ac 1 -ar 8000 -aspect 4:3 -r 30 -coder 1 -flags2 +dct8x8 -flags +loop -deblockalpha 0 -deblockbeta 0 -cmp +chroma -partitions +parti4x4+parti8x8+partp8x8 -me_method umh -subq 9 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.714 -qblur 0.5 -b_strategy 1 -threads 2 -trellis 2 -chromaoffset 0 -qcomp 0.60 -qmin 10 -qmax 51 -qdiff 4 -y -f avi -threads 1 {out_filename}
-    out_ext: avi
+    out_ext: mp4
 
   # do not use this for 4K and slow motion!
   mp4-panasonic-dmc-tz80:
     command: ffmpeg
     params: |
-      -i {in_filename} -y -c:v libx264 -crf 24 -preset slow -profile:v high -f matroska -c:a aac -b 120k {out_filename}
-    out_ext: mkv
+      -i {in_filename} -y -c:v libx264 -crf 24 -preset slow -profile:v high -f mp4 -c:a aac -b 120k {out_filename}
+    out_ext: mp4
 
   # beware of slow motion etc.!
   mov-apple-iphone-se:
