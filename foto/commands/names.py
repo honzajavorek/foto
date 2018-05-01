@@ -33,7 +33,7 @@ def names_fix(directory):
 def names_sort(directory):
     logger = Logger('names:sort')
 
-    exts = config['media_exts']
+    exts = config['photo_exts']
     unsorted_filenames = list_files(directory, exts=exts)
 
     all_prefixed = all(re.match(r'\d+\-', os.path.basename(filename))
@@ -76,14 +76,11 @@ def names_unsort(directory):
     exts = config['media_exts']
     sorted_filenames = list_files(directory, exts=exts)
 
-    all_prefixed = all(re.match(r'\d+\-', os.path.basename(filename))
-                       for filename in sorted_filenames)
-    if not all_prefixed:
-        logger.log('Not sorted, there are files without prefixes')
-        return
-
     for filename in sorted_filenames:
         basename = os.path.basename(filename)
+        if not re.match(r'\d+\-', os.path.basename(filename)):
+            logger.log('{}'.format(basename))
+            continue
 
         # move
         new_basename = re.sub(r'\d+\-', '', basename)

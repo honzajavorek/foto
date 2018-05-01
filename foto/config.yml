@@ -1,7 +1,10 @@
 info_basename: album.yml
 index_basename: .arrange
 command: subl -n -w
-media_exts: [jpg, jpeg, png, mov, avi, amr, mp4, mpg, raw]
+photo_exts: [jpg, jpeg, png, raw]
+video_exts: [mov, avi, mp4, mpg, 3gp]
+audio_exts: [amr]
+# media_exts: [... all above ...] (automatically compiled and added)
 rubbish: [feed.rss, Thumbs.db, .arrange, .DS_Store, Picasa.ini, info.txt, 'View Online.url']
 
 yaml:

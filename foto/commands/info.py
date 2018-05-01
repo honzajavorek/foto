@@ -41,8 +41,11 @@ def info_restore(directory):
             if restored_info:
                 merge_info(info, restored_info)
 
-    with open(info_filename, 'w', encoding='utf8') as f:
-        yaml.dump(info, f, **config['yaml'])
+    if not len(info):
+        logger.warn('There is no info to save')
+    else:
+        with open(info_filename, 'w', encoding='utf8') as f:
+            yaml.dump(info, f, **config['yaml'])
 
 
 def select_restoration_function(logger, filename):
