@@ -122,7 +122,7 @@ commands = [
     {
         'name': 'times:fix',
         'import_path': 'foto.commands.times.times_fix',
-        'help': 'Fix time in directory for certain device',
+        'help': 'Fix recorded times in the directory',
     },
     {
         'name': 'info:restore',

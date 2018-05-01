@@ -68,15 +68,9 @@ def test_fix(fixtures_dir):
         os.path.join(fixtures_dir, basename)
         for basename in os.listdir(fixtures_dir)
     ]
-    list(shift(filenames, ('Panasonic', 'DMC-TZ80'), -2))
+    list(shift(filenames, -2))
 
     assert (
         creation_datetime(os.path.join(fixtures_dir, 'P1000805.jpg'))
         == datetime(2017, 7, 7, 15, 8, 0, 989000)
     )
-    names_sort(fixtures_dir)
-    assert set(os.listdir(fixtures_dir)) == set([
-        '0-P1000805.jpg',  # 2017:07:07 15:08:00
-        '1-IMG_3087.jpg',  # 2017:07:07 15:55:46
-        '2-IMG_5012.jpg',  # 2018:05:01 12:58:47
-    ])

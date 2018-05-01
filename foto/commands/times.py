@@ -4,8 +4,8 @@ import click
 
 from foto import config
 from foto.logger import Logger
-from foto.utils import (list_files, detect_camera, Metadata, shift_datetime,
-                        FileFormatError, format_datetime)
+from foto.utils import (list_files, Metadata, shift_datetime, FileFormatError,
+                        format_datetime)
 
 
 __all__ = ['times_fix']
@@ -19,6 +19,10 @@ TAGS = (
     'DigitalCreationTime',
     'DateTimeOriginal',
     'ModifyDate',
+    'TrackCreateDate',
+    'TrackModifyDate',
+    'MediaCreateDate',
+    'MediaModifyDate',
 )
 LONGEST_TAG_LEN = len('SubSec') + max(*map(len, TAGS))
 LONGEST_DT_LEN = 32
@@ -26,37 +30,14 @@ LONGEST_DT_LEN = 32
 
 def times_fix(directory):
     logger = Logger('times:fix')
-    logger.log('Looking for camera types')
 
     filenames = list_files(directory, exts=config['media_exts'])
-    cameras = list(sorted(set(filter(None, map(detect_camera, filenames)))))
-
-    if not len(cameras):
-        logger.err('No cameras found')
-        return
-
-    if len(cameras) == 1:
-        logger.warn('Just one camera found')
-        chosen_camera = cameras[0]
-    else:
-        for i, camera in enumerate(cameras):
-            logger.log('{} ... {} {}'.format(
-                click.style(str(i + 1), fg='blue', bold=True), *camera
-            ))
-
-        chosen_camera_no = -1
-        while chosen_camera_no < 0 or chosen_camera_no >= len(cameras):
-            chosen_camera_no = logger.prompt('Choose camera type number', type=int) - 1
-        chosen_camera = cameras[chosen_camera_no]
-
-    hours = logger.prompt((
-        'Specify how to shift hours for photos '
-        'made by the {} {}: (for example +3 or -2)'.format(*chosen_camera)
-    ), type=int)
+    hours = logger.prompt(
+        'Specify how to shift hours: (for example +3 or -2)', type=int)
     if hours == 0:
         return
 
-    for basename, tag, val, val_shifted in shift(filenames, chosen_camera, hours):
+    for basename, tag, val, val_shifted in shift(filenames, hours):
         logger.log('{}: {} {} → {}'.format(
             click.style(basename, bold=True),
             click.style(tag.ljust(LONGEST_TAG_LEN), bold=True),
@@ -67,13 +48,9 @@ def times_fix(directory):
         ))
 
 
-def shift(filenames, camera, hours):
+def shift(filenames, hours):
     for filename in filenames:
-        detected_camera = detect_camera(filename)
-        if not detected_camera or detected_camera != camera:
-            continue
         basename = os.path.basename(filename)
-
         meta = Metadata(filename)
         try:
             for tag in TAGS:
