@@ -31,7 +31,7 @@ Your ``~/.bash_profile``:
 License: ISC
 ------------
 
-© 2010-? Honza Javorek mail@honzajavorek.cz
+© 2010 Honza Javorek mail@honzajavorek.cz
 
 This work is licensed under `ISC
 license <https://en.wikipedia.org/wiki/ISC_license>`__.
