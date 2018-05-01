@@ -5,7 +5,7 @@ import datetime
 
 try:
     import pync
-except ImportError:
+except (Exception, ImportError):
     pync = None
 
 from plumbum.cmd import file as file_cmd
