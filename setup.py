@@ -17,7 +17,6 @@ install_requires = [
     'plumbum',
     'send2trash',
     'pync',
-    'arrow',
     'click',
     'geocoder',
     'pyaml',

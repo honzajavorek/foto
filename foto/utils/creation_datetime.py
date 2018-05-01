@@ -9,9 +9,17 @@ _numeric_re = re.compile(r'^(\D*)(\d+)$')
 
 def creation_datetime(filename):
     candidates = list(_gen_candidates(filename))
-    dt = _find_in_tag(candidates, 'CreateDate')
-    if dt:
-        return dt
+    for tag in [
+        'SubSecCreateDate',
+        'CreateDate',
+        'SubSecDateTimeOriginal',
+        'DateTimeOriginal',
+        'SubSecModifyDate',
+        'ModifyDate',
+    ]:
+        dt = _find_in_tag(candidates, tag)
+        if dt:
+            return dt
     return _find_in_tag(candidates, 'FileModifyDate')
 
 

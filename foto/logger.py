@@ -27,3 +27,9 @@ class Logger():
             + click.style(' {} '.format(message), **style)
         )
         click.echo(message, err=True)
+
+    def prompt(self, message, **kwargs):
+        message = (
+            click.style(self.name + ' ', dim=True) + message
+        )
+        return click.prompt(message, **kwargs)

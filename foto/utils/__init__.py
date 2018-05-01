@@ -1,10 +1,11 @@
 import os
 import shlex
 import pipes
+import datetime
 
 try:
     import pync
-except:
+except ImportError:
     pync = None
 
 from plumbum.cmd import file as file_cmd
@@ -13,13 +14,33 @@ from send2trash import send2trash as to_trash
 from .metadata import Metadata, FileFormatError
 from .geo import location
 from .creation_datetime import creation_datetime
+from .format_datetime import format_datetime
 
 
 __all__ = [
     'to_trash', 'Metadata', 'location', 'creation_datetime',
     'parse_cmd_args', 'list_dirs', 'list_files', 'notify',
-    'FileFormatError',
+    'FileFormatError', 'detect_camera', 'format_datetime',
 ]
+
+
+def detect_camera(filename):
+    _, ext = os.path.splitext(filename)
+    ext = ext.lstrip('.').lower()
+
+    meta = Metadata(filename)
+    make, model = meta['Make'], meta['Model']
+
+    if make and model:
+        return (make, model)
+
+    if ext == 'mov' and meta['VendorID'] == 'Panasonic':
+        width = int(meta.get('SourceImageWidth', 0))
+        height = int(meta.get('SourceImageHeight', 0))
+        if width == 640 and height == 480:
+            return ('Panasonic', 'DMC-FZ8')
+
+    return None
 
 
 def parse_cmd_args(s, **wildcards):
@@ -63,3 +84,18 @@ def is_corrupted_file(filename):
 def notify(name, message):
     if pync:
         pync.Notifier.notify(message, title=name)
+
+
+def to_naive(dt):
+    if dt.tzinfo:
+        return dt.replace(tzinfo=None)
+    return dt
+
+
+def shift_datetime(dt, hours):
+    if isinstance(dt, datetime.time):
+        return (
+            datetime.datetime.combine(datetime.date(10, 10, 10), dt)
+            + datetime.timedelta(hours=hours)
+        ).time()
+    return dt + datetime.timedelta(hours=hours)

@@ -115,6 +115,16 @@ commands = [
         'help': 'Rename all files in directory to sort them by date & time',
     },
     {
+        'name': 'names:unsort',
+        'import_path': 'foto.commands.names.names_unsort',
+        'help': 'Remove numbered prefixes made by names:sort',
+    },
+    {
+        'name': 'times:fix',
+        'import_path': 'foto.commands.times.times_fix',
+        'help': 'Fix time in directory for certain device',
+    },
+    {
         'name': 'info:restore',
         'import_path': 'foto.commands.info.info_restore',
         'help': ('Reads Picasa.ini, feed.rss, etc. to restore album info'

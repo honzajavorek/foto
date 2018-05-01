@@ -1,10 +1,11 @@
 import re
 import string
-from datetime import datetime
+from datetime import datetime, time
 
-import arrow
 from plumbum.cmd import exiftool
 from plumbum.commands.processes import ProcessExecutionError
+
+from .format_datetime import format_datetime
 
 
 __all__ = ['FileFormatError', 'Metadata']
@@ -28,6 +29,10 @@ class Metadata(object):
     _datetime_re = re.compile(
         r'^(\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?)([\-+]\d{2}:\d{2})?$'
     )
+    _time_re = re.compile(
+        r'^(\d{2}:\d{2}:\d{2}(\.\d+)?)([\-+]\d{2}:\d{2})?$'
+    )
+    _timezone_re = re.compile(r'([+\-])(\d{2}):(\d{2})$')
 
     _correct_encoding_re = re.compile(
         r'^[\w\s' + re.escape(string.punctuation) + r']+$',
@@ -58,14 +63,24 @@ class Metadata(object):
 
         value = self._detect_correct_charset(values)
 
-        if value and self._datetime_re.match(value):
-            return self._to_datetime(value)
+        if value:
+            if self._datetime_re.match(value):
+                return self._to_datetime(value)
+            if self._time_re.match(value):
+                return self._to_time(value)
         return value
 
-    def get(self, tag, default):
+    def get(self, tag, default=None):
         if tag in self:
             return self[tag]
         return default
+
+    def getfirst(self, tags):
+        for tag in tags:
+            value = self.get(tag)
+            if value:
+                return tag, value
+        return None, None
 
     def _get_tag(self, tag, charset=None):
         args = [self.filename, '-preserve', '-' + tag]
@@ -176,22 +191,51 @@ class Metadata(object):
     def _to_datetime(self, s):
         if s.startswith('0000:00:00'):
             return None
-        formats = [
-            'YYYY:MM:DD HH:mm:ssZZ',
-            'YYYY:MM:DD HH:mm:ss',
-            'YYYY:MM:DD',
-        ]
+
+        timezone_match = self._timezone_re.search(s)
+        if timezone_match:
+            s = self._timezone_re.sub(r'\1\2\3', s)
+            formats = [
+                '%Y:%m:%d %H:%M:%S.%f%z',
+                '%Y:%m:%d %H:%M:%S%z',
+            ]
+        else:
+            formats = [
+                '%Y:%m:%d %H:%M:%S.%f',
+                '%Y:%m:%d %H:%M:%S',
+                '%Y:%m:%d',
+            ]
         for fmt in formats:
             try:
-                return arrow.get(s, fmt)
-            except arrow.parser.ParserError:
+                return datetime.strptime(s, fmt)
+            except ValueError:
+                pass
+        raise ValueError('Unable to parse as datetime: {}'.format(s))
+
+    def _to_time(self, s):
+        if s.startswith('00:00'):
+            return None
+
+        timezone_match = self._timezone_re.search(s)
+        if timezone_match:
+            s = self._timezone_re.sub(r'\1\2\3', s)
+            formats = ['%H:%M:%S.%f%z', '%H:%M:%S%z']
+        else:
+            formats = ['%H:%M:%S.%f', '%H:%M:%S']
+        for fmt in formats:
+            try:
+                dt = datetime.strptime(s, fmt)
+                if timezone_match:
+                    return dt.timetz()
+                return dt.time()
+            except ValueError:
                 pass
         raise ValueError('Unable to parse as datetime: {}'.format(s))
 
     def __setitem__(self, tag, content):
         if content:
-            if isinstance(content, datetime):
-                content = self._from_datetime(content)
+            if isinstance(content, datetime) or isinstance(content, time):
+                content = format_datetime(content)
         else:
             content = ''
         self.update({tag: content})
@@ -213,14 +257,16 @@ class Metadata(object):
         if tag not in self:
             self[tag] = content
 
-    def _from_datetime(self, dt):
-        return arrow.fromdatetime(dt).format('YYYY:MM:DD HH:mm:ssZZ')
-
     def __delitem__(self, tag):
         self[tag] = None
 
     def __contains__(self, tag):
-        return self[tag] is not None
+        try:
+            self._get_tag(tag, self.read_charsets[0])
+        except self.TagDoesNotExist:
+            return False
+        else:
+            return True
 
     def _exiftool(self, *args, **kwargs):
         try:

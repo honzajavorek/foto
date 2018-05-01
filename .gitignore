@@ -27,6 +27,9 @@ pip-log.txt
 .noseids
 nosetests.xml
 
+# pytest
+.pytest_cache
+
 # Translations
 *.mo
 

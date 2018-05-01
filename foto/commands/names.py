@@ -5,7 +5,7 @@ import click
 
 from foto import config
 from foto.logger import Logger
-from foto.utils import list_files, creation_datetime
+from foto.utils import list_files, creation_datetime, to_naive
 
 
 __all__ = ['names_fix', 'names_sort']
@@ -42,9 +42,8 @@ def names_sort(directory):
         logger.log('Looks like already sorted')  # keep manual changes
         return
 
-    datetimes = list(map(creation_datetime, unsorted_filenames))
+    datetimes = [to_naive(creation_datetime(f)) for f in unsorted_filenames]
     filenames_by_datetimes = list(zip(datetimes, unsorted_filenames))
-
     filenames = [
         filename for datetime, filename in sorted(filenames_by_datetimes)
     ]
@@ -59,6 +58,35 @@ def names_sort(directory):
 
         # move
         new_basename = prefix + basename
+        new_filename = os.path.join(directory, new_basename)
+        if os.path.exists(new_filename):
+            logger.err('Exists! {} → {}'.format(basename, new_basename))
+            return
+        else:
+            logger.log('{} → {}'.format(
+                basename,
+                click.style(new_basename, fg='green')
+            ))
+            os.rename(filename, new_filename)
+
+
+def names_unsort(directory):
+    logger = Logger('names:unsort')
+
+    exts = config['media_exts']
+    sorted_filenames = list_files(directory, exts=exts)
+
+    all_prefixed = all(re.match(r'\d+\-', os.path.basename(filename))
+                       for filename in sorted_filenames)
+    if not all_prefixed:
+        logger.log('Not sorted, there are files without prefixes')
+        return
+
+    for filename in sorted_filenames:
+        basename = os.path.basename(filename)
+
+        # move
+        new_basename = re.sub(r'\d+\-', '', basename)
         new_filename = os.path.join(directory, new_basename)
         if os.path.exists(new_filename):
             logger.err('Exists! {} → {}'.format(basename, new_basename))

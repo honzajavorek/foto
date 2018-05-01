@@ -3,14 +3,15 @@ import shutil
 from time import time
 from collections import namedtuple
 from tempfile import NamedTemporaryFile
-from slugify import slugify
 
 import click
 from plumbum import local
+from slugify import slugify
 
 from foto import config
 from foto.logger import Logger
-from foto.utils import list_files, notify, to_trash, parse_cmd_args, Metadata
+from foto.utils import (list_files, notify, to_trash, parse_cmd_args,
+                        detect_camera)
 
 
 __all__ = ['convert', 'convert_images', 'convert_audio', 'convert_video']
@@ -55,7 +56,7 @@ def convert_multimedia_files(logger, directory, exts):
 def convert_video(directory):
     logger = Logger('convert:video')
     for filename in list_files(directory, exts=['mov', 'mp4']):
-        config_key = detect_camera(filename)
+        config_key = get_config_key(filename)
         if config_key:
             options = config['converting'].get(config_key)
             if options:
@@ -68,22 +69,14 @@ def convert_video(directory):
             logger.log(message.format(os.path.basename(filename)))
 
 
-def detect_camera(filename):
+def get_config_key(filename):
     _, ext = os.path.splitext(filename)
     ext = ext.lstrip('.').lower()
 
-    meta = Metadata(filename)
-    make, model = meta['Make'], meta['Model']
-
-    if make and model:
+    camera = detect_camera(filename)
+    if camera:
+        make, model = camera
         return slugify('-'.join([ext, make, model]))
-
-    if ext == 'mov' and meta['VendorID'] == 'Panasonic':
-        width = int(meta.get('SourceImageWidth', 0))
-        height = int(meta.get('SourceImageHeight', 0))
-        if width == 640 and height == 480:
-            return 'mov-panasonic-dmc-fz8'
-
     return None
 
 
