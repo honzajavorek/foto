@@ -52,7 +52,7 @@ def names_sort(directory):
         return
 
     n_maxlen = len(str(len(filenames)))
-    for n, filename in enumerate(filenames):
+    for n, filename in enumerate(filenames, start=1):
         basename = os.path.basename(filename)
         prefix = str(n).zfill(n_maxlen) + '-'
 
