@@ -17,10 +17,6 @@ from foto.utils import (list_files, notify, to_trash, parse_cmd_args, Metadata)
 __all__ = ['convert', 'convert_images', 'convert_audio', 'convert_video']
 
 
-IMAGE_EXTS = ['jpg']
-AUDIO_EXTS = ['amr']
-VIDEO_EXTS = ['mov', 'mp4', 'mkv', 'avi', '3gp']
-
 MOTOROLA_RE = re.compile(r'\d{4}\-\d{2}\-\d{2} \d{2}\.\d{2}\.\d{2}')
 
 
@@ -42,12 +38,12 @@ def convert(directory):
 
 def convert_images(directory):
     logger = Logger('convert:images')
-    convert_multimedia_files(logger, directory, IMAGE_EXTS)
+    convert_multimedia_files(logger, directory, config['photo_exts'])
 
 
 def convert_audio(directory):
     logger = Logger('convert:audio')
-    convert_multimedia_files(logger, directory, AUDIO_EXTS)
+    convert_multimedia_files(logger, directory, config['audio_exts'])
 
 
 def convert_multimedia_files(logger, directory, exts):
@@ -55,6 +51,7 @@ def convert_multimedia_files(logger, directory, exts):
         for filename in list_files(directory, exts=[ext]):
             options = config['converting'].get(ext)
             if options:
+                options.setdefault('export_metadata', False)
                 convert_multimedia(logger, filename, options)
             else:
                 logger.log("Unable to find configuration for '{}'".format(ext))
@@ -62,12 +59,13 @@ def convert_multimedia_files(logger, directory, exts):
 
 def convert_video(directory):
     logger = Logger('convert:video')
-    for filename in list_files(directory, exts=VIDEO_EXTS):
+    for filename in list_files(directory, exts=config['video_exts']):
         basename = os.path.basename(filename)
         config_key = get_config_key(filename)
         if config_key:
             options = config['converting'].get(config_key)
             if options:
+                options.setdefault('export_metadata', True)
                 convert_multimedia(logger, filename, options)
             else:
                 message = "Unable to find configuration for '{}' ({})"
@@ -149,8 +147,9 @@ def convert_multimedia(logger, filename, options):
         os.unlink(tmp_filename)
     else:
         # write metadata JSON
-        with open(names.metadata, 'w') as f:
-            f.write(Metadata(names.in_filename).to_json())
+        if options.get('export_metadata'):
+            with open(names.metadata, 'w') as f:
+                f.write(Metadata(names.in_filename).to_json())
 
         # trash the original file, move result
         to_trash(names.in_filename)
@@ -176,7 +175,7 @@ def prepare_names(filename, out_ext):
     base, _ = os.path.splitext(basename)
     out_basename = '{}.{}'.format(base, out_ext)
     out_filename = os.path.join(directory, out_basename)
-    metadata = '.{}-{}.json'.format(basename, out_ext)
+    metadata = '{}-{}.json'.format(basename, out_ext)
 
     return Names(filename, basename, out_filename, out_basename,
                  directory, metadata)

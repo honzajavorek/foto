@@ -2,7 +2,7 @@ info_basename: album.yml
 index_basename: .arrange
 command: subl -n -w
 photo_exts: [jpg, jpeg, png, raw]
-video_exts: [mov, avi, mp4, mpg, 3gp]
+video_exts: [mov, avi, mkv, mp4, mpg, 3gp]
 audio_exts: [amr]
 # media_exts: [... all above ...] (automatically compiled and added)
 rubbish: [feed.rss, Thumbs.db, .arrange, .DS_Store, Picasa.ini, info.txt, 'View Online.url']
@@ -29,7 +29,6 @@ converting:
     params: |
       -i {in_filename} -vcodec libx264 -crf 25.5 -acodec libmp3lame -ab 64k -ac 1 -ar 16000 -aspect 4:3 -r 30 -y -f mp4 {out_filename}
     out_ext: mp4
-    export_metadata: yes
 
   mp4-panasonic-dmc-tz80:
     command: ffmpeg

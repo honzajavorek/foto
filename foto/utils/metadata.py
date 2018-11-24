@@ -98,11 +98,11 @@ class Metadata(object):
         return value
 
     def _detect_correct_charset(self, values):
-        values_are_identical = len(frozenset(values)) == 1
-        if values_are_identical:
+        values = list(frozenset(values))
+        if len(values) == 1:
             return values[0]
 
-        # Gather detailed information about cadidate values
+        # Gather detailed information about candidate values
         values_details = [
             {
                 'value': value,
