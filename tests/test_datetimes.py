@@ -52,9 +52,9 @@ def test_datetimes_formatting(dt, expected):
 def test_sort(fixtures_dir):
     names_sort(fixtures_dir)
     assert set(os.listdir(fixtures_dir)) == set([
-        '0-IMG_3087.jpg',  # 2017:07:07 15:55:46
-        '1-P1000805.jpg',  # 2017:07:07 17:08:00
-        '2-IMG_5012.jpg',  # 2018:05:01 12:58:47
+        '1-IMG_3087.jpg',  # 2017:07:07 15:55:46
+        '2-P1000805.jpg',  # 2017:07:07 17:08:00
+        '3-IMG_5012.jpg',  # 2018:05:01 12:58:47
     ])
 
 

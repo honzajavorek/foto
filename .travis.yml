@@ -14,7 +14,7 @@ env:
 install:
   - "pip install -e .[tests,release]"
 script:
-  - "flake8"
+  - "pylama"
   - "which foto"
   - "foto --version"
   - "foto --help"

@@ -268,6 +268,9 @@ class Metadata(object):
         else:
             return True
 
+    def to_json(self):
+        return self._exiftool(self.filename, '-json').strip()
+
     def _exiftool(self, *args, **kwargs):
         try:
             return exiftool(*args, **kwargs)

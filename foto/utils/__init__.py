@@ -20,27 +20,8 @@ from .format_datetime import format_datetime
 __all__ = [
     'to_trash', 'Metadata', 'location', 'creation_datetime',
     'parse_cmd_args', 'list_dirs', 'list_files', 'notify',
-    'FileFormatError', 'detect_camera', 'format_datetime',
+    'FileFormatError', 'format_datetime',
 ]
-
-
-def detect_camera(filename):
-    _, ext = os.path.splitext(filename)
-    ext = ext.lstrip('.').lower()
-
-    meta = Metadata(filename)
-    make, model = meta['Make'], meta['Model']
-
-    if make and model:
-        return (make, model)
-
-    if ext == 'mov' and meta['VendorID'] == 'Panasonic':
-        width = int(meta.get('SourceImageWidth', 0))
-        height = int(meta.get('SourceImageHeight', 0))
-        if width == 640 and height == 480:
-            return ('Panasonic', 'DMC-FZ8')
-
-    return None
 
 
 def parse_cmd_args(s, **wildcards):

@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from time import time
 from collections import namedtuple
@@ -10,16 +11,22 @@ from slugify import slugify
 
 from foto import config
 from foto.logger import Logger
-from foto.utils import (list_files, notify, to_trash, parse_cmd_args,
-                        detect_camera)
+from foto.utils import (list_files, notify, to_trash, parse_cmd_args, Metadata)
 
 
 __all__ = ['convert', 'convert_images', 'convert_audio', 'convert_video']
 
 
+IMAGE_EXTS = ['jpg']
+AUDIO_EXTS = ['amr']
+VIDEO_EXTS = ['mov', 'mp4', 'mkv', 'avi', '3gp']
+
+MOTOROLA_RE = re.compile(r'\d{4}\-\d{2}\-\d{2} \d{2}\.\d{2}\.\d{2}')
+
+
 Names = namedtuple(
     'Names',
-    'in_filename in_basename out_filename out_basename dir'
+    'in_filename in_basename out_filename out_basename dir metadata'
 )
 
 
@@ -35,12 +42,12 @@ def convert(directory):
 
 def convert_images(directory):
     logger = Logger('convert:images')
-    convert_multimedia_files(logger, directory, ['jpg'])
+    convert_multimedia_files(logger, directory, IMAGE_EXTS)
 
 
 def convert_audio(directory):
     logger = Logger('convert:audio')
-    convert_multimedia_files(logger, directory, ['amr'])
+    convert_multimedia_files(logger, directory, AUDIO_EXTS)
 
 
 def convert_multimedia_files(logger, directory, exts):
@@ -55,29 +62,47 @@ def convert_multimedia_files(logger, directory, exts):
 
 def convert_video(directory):
     logger = Logger('convert:video')
-    for filename in list_files(directory, exts=['mov', 'mp4']):
+    for filename in list_files(directory, exts=VIDEO_EXTS):
+        basename = os.path.basename(filename)
         config_key = get_config_key(filename)
         if config_key:
             options = config['converting'].get(config_key)
             if options:
                 convert_multimedia(logger, filename, options)
             else:
-                message = "Unable to find configuration for '{}'"
-                logger.log(message.format(config_key))
+                message = "Unable to find configuration for '{}' ({})"
+                logger.log(message.format(config_key, basename))
         else:
-            message = "Unable to detect camera model of '{}'"
-            logger.log(message.format(os.path.basename(filename)))
+            message = "Unable to get config key (detect camera model) of '{}'"
+            logger.log(message.format(basename))
 
 
 def get_config_key(filename):
-    _, ext = os.path.splitext(filename)
+    basename, ext = os.path.splitext(os.path.basename(filename))
     ext = ext.lstrip('.').lower()
 
-    camera = detect_camera(filename)
-    if camera:
-        make, model = camera
-        return slugify('-'.join([ext, make, model]))
-    return None
+    meta = Metadata(filename)
+    make, model = meta['Make'], meta['Model']
+
+    if make and model:
+        parts = [ext, make, model]
+        # if basename.startswith('trim'):
+        #     parts.append('slowmotion')
+        return slugify('-'.join(parts))
+
+    if ext == 'mp4' and MOTOROLA_RE.match(basename):
+        width = int(meta.get('SourceImageWidth', 0))
+        height = int(meta.get('SourceImageHeight', 0))
+        if width == 1920 and height == 1080:
+            return 'mp4-motorola-xt1069'
+
+    if ext == 'mov' and meta['VendorID'] == 'Panasonic':
+        width = int(meta.get('SourceImageWidth', 0))
+        height = int(meta.get('SourceImageHeight', 0))
+        if width == 640 and height == 480:
+            return 'mov-panasonic-dmc-fz8'
+
+    return ext
 
 
 def convert_multimedia(logger, filename, options):
@@ -118,12 +143,16 @@ def convert_multimedia(logger, filename, options):
     out_size = os.path.getsize(tmp_filename) / 1024 / 1024  # MB
     compression = 100 - (100 * out_size / in_size)
 
-    # trash the original file, move result
     if in_ext == out_ext and in_size <= out_size:
         # converting within the same format and the conversion had no
         # possitive effect => we can keep the original
         os.unlink(tmp_filename)
     else:
+        # write metadata JSON
+        with open(names.metadata, 'w') as f:
+            f.write(Metadata(names.in_filename).to_json())
+
+        # trash the original file, move result
         to_trash(names.in_filename)
         shutil.move(tmp_filename, names.out_filename)
 
@@ -147,5 +176,7 @@ def prepare_names(filename, out_ext):
     base, _ = os.path.splitext(basename)
     out_basename = '{}.{}'.format(base, out_ext)
     out_filename = os.path.join(directory, out_basename)
+    metadata = '.{}-{}.json'.format(basename, out_ext)
 
-    return Names(filename, basename, out_filename, out_basename, directory)
+    return Names(filename, basename, out_filename, out_basename,
+                 directory, metadata)

@@ -27,9 +27,9 @@ install_requires = [
 tests_require = [
     'pytest-runner',
     'pytest',
-    'flake8',
     'coveralls',
     'pytest-cov',
+    'pylama',
 ]
 release_requires = [
     'python-semantic-release',
