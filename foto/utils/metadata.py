@@ -47,6 +47,11 @@ class Metadata(object):
         frozenset(['ň', 'ò']): 'ň',
     }
 
+    _format_not_supported_re = re.compile(
+        r'writing of .+ files is not yet supported',
+        re.I
+    )
+
     class TagDoesNotExist(Exception):
         pass
 
@@ -273,12 +278,26 @@ class Metadata(object):
         return self._exiftool('-X', '-b', '-makernotes', '-all',
                               self.filename).strip()
 
+    def set_caption(self, caption):
+        self['Caption-Abstract'] = caption
+        self['Headline'] = caption
+
+    def remove_caption(self):
+        del self['Caption-Abstract']
+        del self['Headline']
+
+    def get_caption(self):
+        return self.get('Caption-Abstract') or self.get('Headline')
+
     def _exiftool(self, *args, **kwargs):
         try:
             return exiftool(*args, **kwargs)
         except ProcessExecutionError as e:
             if 'file format error' in e.stderr.lower():
                 _, filename = e.stderr.strip().split('format error - ')
+                raise FileFormatError(filename)
+            elif self._format_not_supported_re.search(e.stderr):
+                _, filename = e.stderr.strip().split('yet supported - ')
                 raise FileFormatError(filename)
             else:
                 raise

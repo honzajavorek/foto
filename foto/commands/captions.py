@@ -6,7 +6,7 @@ from foto.logger import Logger
 from foto.utils import list_files, Metadata, FileFormatError
 
 
-__all__ = ['captions', 'captions_fix']
+__all__ = ['captions', 'captions_fix', 'captions_clean']
 
 
 def captions(directory):
@@ -19,7 +19,7 @@ def captions(directory):
         basename_fmt = click.style('{}'.format(basename), bold=True)
 
         try:
-            caption = meta.get('Headline', meta['Caption-Abstract'])
+            caption = meta.get_caption()
             logger.log('{}: {}'.format(basename_fmt, caption or ' - '))
         except FileFormatError:
             logger.log('{}:  -  (not an image file)'.format(basename_fmt))
@@ -33,8 +33,7 @@ def captions_fix(directory):
 
         meta = Metadata(filename)
         try:
-            caption = meta.get('Headline', meta['Caption-Abstract']) or ''
-
+            caption = meta.get_caption()
             if not caption:
                 continue
 
@@ -46,8 +45,7 @@ def captions_fix(directory):
             if single_quoted or double_quoted:
                 caption = caption[1:-1]
 
-            meta['Headline'] = caption
-            del meta['Caption-Abstract']
+            meta.set_caption(caption)
 
             logger.log('{}: {} → {}'.format(
                 click.style(basename, bold=True),
@@ -57,3 +55,20 @@ def captions_fix(directory):
 
         except FileFormatError:
             continue
+
+
+def captions_clean(directory):
+    logger = Logger('captions:clean')
+
+    for filename in list_files(directory, exts=['jpg']):
+        basename = os.path.basename(filename)
+
+        meta = Metadata(filename)
+        basename_fmt = click.style('{}'.format(basename), bold=True)
+
+        try:
+            caption = meta.get_caption()
+            meta.remove_caption()
+            logger.log('{}: {} → {}'.format(basename_fmt, caption or ' - ', ' - '))
+        except FileFormatError:
+            logger.log('{}:  -  (not an image file)'.format(basename_fmt))

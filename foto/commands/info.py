@@ -8,7 +8,7 @@ from lxml import etree
 
 from foto import config
 from foto.logger import Logger
-from foto.utils import list_files, Metadata
+from foto.utils import list_files, Metadata, FileFormatError
 
 
 __all__ = ['info_restore']
@@ -161,23 +161,27 @@ def save_photo_caption(logger, filename, caption):
     if not os.path.exists(filename) or not caption:
         return
     basename = os.path.basename(filename)
+    basename_fmt = click.style(basename, bold=True)
 
     meta = Metadata(filename)
-    existing_caption = meta['Headline']
+    existing_caption = meta.get_caption()
     if caption == existing_caption:
         logger.log('{}: {} (already there)'.format(
-            click.style(basename, bold=True),
+            basename_fmt,
             existing_caption,
         ))
     elif existing_caption:
         logger.log('{}: {} ? {} (keeping original)'.format(
-            click.style(basename, bold=True),
+            basename_fmt,
             click.style(existing_caption, fg='blue'),
             click.style(caption, fg='blue'),
         ))
     else:
-        meta['Headline'] = caption
-        logger.log('{}:  -  → {}'.format(
-            click.style(basename, bold=True),
-            click.style(caption, fg='green'),
-        ))
+        try:
+            meta.set_caption(caption)
+            logger.log('{}:  -  → {}'.format(
+                basename_fmt,
+                click.style(caption, fg='green'),
+            ))
+        except FileFormatError:
+            logger.log('{}:  -  (not an image file)'.format(basename_fmt))

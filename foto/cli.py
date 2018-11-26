@@ -105,6 +105,11 @@ commands = [
         'help': 'Fix all captions in directory',
     },
     {
+        'name': 'captions:clean',
+        'import_path': 'foto.commands.captions.captions_clean',
+        'help': 'Remove all captions in directory',
+    },
+    {
         'name': 'names:fix',
         'import_path': 'foto.commands.names.names_fix',
         'help': 'Fix all filenames in directory',
