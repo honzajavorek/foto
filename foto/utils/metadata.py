@@ -1,4 +1,5 @@
 import re
+import os
 import string
 from datetime import datetime, time
 
@@ -268,8 +269,9 @@ class Metadata(object):
         else:
             return True
 
-    def to_json(self):
-        return self._exiftool(self.filename, '-json').strip()
+    def to_xml(self):
+        return self._exiftool('-X', '-b', '-makernotes', '-all',
+                              self.filename).strip()
 
     def _exiftool(self, *args, **kwargs):
         try:

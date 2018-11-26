@@ -61,18 +61,22 @@ def convert_video(directory):
     logger = Logger('convert:video')
     for filename in list_files(directory, exts=config['video_exts']):
         basename = os.path.basename(filename)
-        config_key = get_config_key(filename)
-        if config_key:
+
+        converted = False
+        for config_key in get_config_key(filename):
+            message = "{}: Trying configuration '{}'"
+            logger.log(message.format(click.style(basename, bold=True),
+                                      config_key))
             options = config['converting'].get(config_key)
             if options:
                 options.setdefault('export_metadata', True)
                 convert_multimedia(logger, filename, options)
-            else:
-                message = "Unable to find configuration for '{}' ({})"
-                logger.log(message.format(config_key, basename))
-        else:
-            message = "Unable to get config key (detect camera model) of '{}'"
-            logger.log(message.format(basename))
+                converted = True
+                break
+
+        if not converted:
+            message = "{}: Unable to detect configuration"
+            logger.log(message.format(click.style(basename, bold=True)))
 
 
 def get_config_key(filename):
@@ -84,23 +88,21 @@ def get_config_key(filename):
 
     if make and model:
         parts = [ext, make, model]
-        # if basename.startswith('trim'):
-        #     parts.append('slowmotion')
-        return slugify('-'.join(parts))
+        yield slugify('-'.join(parts))
 
-    if ext == 'mp4' and MOTOROLA_RE.match(basename):
+    elif ext == 'mp4' and MOTOROLA_RE.match(basename):
         width = int(meta.get('SourceImageWidth', 0))
         height = int(meta.get('SourceImageHeight', 0))
         if width == 1920 and height == 1080:
-            return 'mp4-motorola-xt1069'
+            yield 'mp4-motorola-xt1069'
 
-    if ext == 'mov' and meta['VendorID'] == 'Panasonic':
+    elif ext == 'mov' and meta['VendorID'] == 'Panasonic':
         width = int(meta.get('SourceImageWidth', 0))
         height = int(meta.get('SourceImageHeight', 0))
         if width == 640 and height == 480:
-            return 'mov-panasonic-dmc-fz8'
+            yield 'mov-panasonic-dmc-fz8'
 
-    return ext
+    yield ext
 
 
 def convert_multimedia(logger, filename, options):
@@ -146,10 +148,14 @@ def convert_multimedia(logger, filename, options):
         # possitive effect => we can keep the original
         os.unlink(tmp_filename)
     else:
-        # write metadata JSON
+        # write metadata file
         if options.get('export_metadata'):
+            meta = Metadata(names.in_filename)
+            logger.log('{0}: writing metadata backup'.format(
+                click.style(names.metadata, bold=True)
+            ))
             with open(names.metadata, 'w') as f:
-                f.write(Metadata(names.in_filename).to_json())
+                f.write(meta.to_xml())
 
         # trash the original file, move result
         to_trash(names.in_filename)
@@ -175,7 +181,7 @@ def prepare_names(filename, out_ext):
     base, _ = os.path.splitext(basename)
     out_basename = '{}.{}'.format(base, out_ext)
     out_filename = os.path.join(directory, out_basename)
-    metadata = '{}-{}.json'.format(basename, out_ext)
+    metadata = '{}.xml'.format(base)
 
     return Names(filename, basename, out_filename, out_basename,
                  directory, metadata)
