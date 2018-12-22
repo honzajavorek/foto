@@ -86,23 +86,30 @@ def get_config_key(filename):
     meta = Metadata(filename)
     make, model = meta['Make'], meta['Model']
 
+    has_audio = bool(
+        int(meta.get('AudioChannels', '0')) > 0
+        or meta['AudioFormat']
+        or meta['AudioSampleRate']
+    )
+    audio_suffix = '' if has_audio else '-silent'
+
     if make and model:
         parts = [ext, make, model]
-        yield slugify('-'.join(parts))
+        yield slugify('-'.join(parts)) + audio_suffix
 
     elif ext == 'mp4' and MOTOROLA_RE.match(basename):
         width = int(meta.get('SourceImageWidth', 0))
         height = int(meta.get('SourceImageHeight', 0))
         if width == 1920 and height == 1080:
-            yield 'mp4-motorola-xt1069'
+            yield 'mp4-motorola-xt1069' + audio_suffix
 
     elif ext == 'mov' and meta['VendorID'] == 'Panasonic':
         width = int(meta.get('SourceImageWidth', 0))
         height = int(meta.get('SourceImageHeight', 0))
         if width == 640 and height == 480:
-            yield 'mov-panasonic-dmc-fz8'
+            yield 'mov-panasonic-dmc-fz8' + audio_suffix
 
-    yield ext
+    yield ext + audio_suffix
 
 
 def convert_multimedia(logger, filename, options):
@@ -162,14 +169,17 @@ def convert_multimedia(logger, filename, options):
         shutil.move(tmp_filename, names.out_filename)
 
     # print summary
-    line = '{0}: {1:.1f}MB → {2} {3:.1f}MB, {4:.1f}min, {5:.1f}%'.format(
-        click.style(names.in_basename, bold=True), in_size,
-        names.out_basename, out_size,
-        t / 60, compression
+    summary = '{0:.1f}MB → {1} {2:.1f}MB, {3:.1f}min, {4:.1f}%'.format(
+        in_size, names.out_basename, out_size, t / 60, compression
     )
-    logger.log(line)
+    logger.log(
+        '{0}: '.format(click.style(names.in_basename, bold=True)) + summary
+    )
     if t > 60:  # longer than one minute
-        notify('Conversion is complete', line)
+        notify(
+            'Conversion is complete',
+            '{0}: '.format(names.in_basename) + summary
+        )
 
 
 def prepare_names(filename, out_ext):
@@ -181,7 +191,7 @@ def prepare_names(filename, out_ext):
     base, _ = os.path.splitext(basename)
     out_basename = '{}.{}'.format(base, out_ext)
     out_filename = os.path.join(directory, out_basename)
-    metadata = '{}.xml'.format(base)
+    metadata = os.path.join(directory, '{}.xml'.format(base))
 
     return Names(filename, basename, out_filename, out_basename,
                  directory, metadata)

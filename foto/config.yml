@@ -2,7 +2,7 @@ info_basename: album.yml
 index_basename: .arrange
 command: subl -n -w
 photo_exts: [jpg, jpeg, png, raw]
-video_exts: [mov, avi, mkv, mp4, mpg, 3gp, ogv]
+video_exts: [mov, avi, mkv, mp4, mpg, 3gp, ogv, wmv]
 audio_exts: [amr]
 # media_exts: [... all above ...] (automatically compiled and added)
 rubbish: [feed.rss, Thumbs.db, .arrange, .DS_Store, Picasa.ini, info.txt, 'View Online.url']
@@ -33,19 +33,25 @@ converting:
   mp4-panasonic-dmc-tz80:
     command: ffmpeg
     params: |
-      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -c:v libx264 -crf 24 -preset slow -profile:v high -f mp4 -c:a aac -b 120k {out_filename}
+      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -c:v libx264 -crf 24 -preset slow -profile:v high -f mp4 -c:a aac -b:a 384k {out_filename}
     out_ext: mp4
 
   mov-apple-iphone-se:
     command: ffmpeg
     params: |
-      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -c:v libx264 -crf 24 -preset slow -profile:v high -f mp4 -c:a aac -b 120k {out_filename}
+      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -c:v libx264 -crf 24 -preset slow -profile:v high -f mp4 -c:a aac -b:a 384k {out_filename}
+    out_ext: mp4
+
+  mov-apple-iphone-se-silent:
+    command: ffmpeg
+    params: |
+      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -y -c:v libx264 -crf 24 -preset slow -profile:v high -f mp4 {out_filename}
     out_ext: mp4
 
   mp4-motorola-xt1069:
     command: ffmpeg
     params: |
-      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -c:v libx264 -crf 24 -preset slow -profile:v high -f mp4 -c:a aac -b 120k {out_filename}
+      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -c:v libx264 -crf 24 -preset slow -profile:v high -f mp4 -c:a aac -b:a 384k {out_filename}
     out_ext: mp4
 
   mkv:
@@ -65,7 +71,7 @@ converting:
   mov:
     command: ffmpeg
     params: |
-      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -vcodec copy -acodec copy -f mp4 {out_filename}
+      -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -vcodec copy -c:a aac -b:a 384k -f mp4 {out_filename}
     out_ext: mp4
 
   3gp:
@@ -77,6 +83,12 @@ converting:
     command: ffmpeg
     params: -i {in_filename} -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -y -c:v libx264 -preset veryslow -crf 22 -c:a libmp3lame -qscale:a 2 -ac 2 -ar 44100 -f mp4 {out_filename}
     out_ext: mp4
+
+  wmv:
+    command: ffmpeg
+    params: -i {in_filename} -map_metadata 0 -y -c:v libx264 -preset veryslow -crf 22 -c:a libmp3lame -qscale:a 2 -ac 2 -ar 44100 -f mp4 {out_filename}
+    out_ext: mp4
+    export_metadata: no
 
   amr:
     command: ffmpeg

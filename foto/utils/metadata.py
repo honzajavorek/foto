@@ -14,6 +14,12 @@ __all__ = ['FileFormatError', 'Metadata']
 
 class FileFormatError(Exception):
 
+    _ffmpeg_errors = (
+        re.compile(r'file format error - '),
+        re.compile(r'files is not yet supported - '),
+        re.compile(r'not a valid [^\(]+ \(looks more like a [^\)]+\) - '),
+    )
+
     def __init__(self, filename, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filename = filename
@@ -45,12 +51,8 @@ class Metadata(object):
         frozenset(['č', 'è']): 'č',
         frozenset(['ů', 'ù']): 'ů',
         frozenset(['ň', 'ò']): 'ň',
+        frozenset(['ď', 'ï']): 'ď',
     }
-
-    _format_not_supported_re = re.compile(
-        r'writing of .+ files is not yet supported',
-        re.I
-    )
 
     class TagDoesNotExist(Exception):
         pass
@@ -171,7 +173,7 @@ class Metadata(object):
         unknown_differences = []
         for char_position in range(max_length):
             chars = [
-                details['value'][char_position]
+                details['value'][char_position].lower()
                 for details in values_details
             ]
             chars_set = frozenset(chars)
@@ -293,11 +295,8 @@ class Metadata(object):
         try:
             return exiftool(*args, **kwargs)
         except ProcessExecutionError as e:
-            if 'file format error' in e.stderr.lower():
-                _, filename = e.stderr.strip().split('format error - ')
-                raise FileFormatError(filename)
-            elif self._format_not_supported_re.search(e.stderr):
-                _, filename = e.stderr.strip().split('yet supported - ')
-                raise FileFormatError(filename)
-            else:
-                raise
+            for error_re in FileFormatError._ffmpeg_errors:
+                if error_re.search(e.stderr.lower()):
+                    _, filename = error_re.split(e.stderr.lower().strip())
+                    raise FileFormatError(filename)
+            raise
