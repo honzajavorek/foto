@@ -32,12 +32,14 @@ def times_fix(directory):
     logger = Logger('times:fix')
 
     filenames = list_files(directory, exts=config['media_exts'])
+    days = logger.prompt(
+        'Specify how to shift days: (for example +3 or -2)', type=int)
     hours = logger.prompt(
         'Specify how to shift hours: (for example +3 or -2)', type=int)
-    if hours == 0:
+    if days == 0 and hours == 0:
         return
 
-    for basename, tag, val, val_shifted in shift(filenames, hours):
+    for basename, tag, val, val_shifted in shift(filenames, days, hours):
         logger.log('{}: {} {} → {}'.format(
             click.style(basename, bold=True),
             click.style(tag.ljust(LONGEST_TAG_LEN), bold=True),
@@ -48,7 +50,7 @@ def times_fix(directory):
         ))
 
 
-def shift(filenames, hours):
+def shift(filenames, days, hours):
     for filename in filenames:
         basename = os.path.basename(filename)
         meta = Metadata(filename)
@@ -56,7 +58,7 @@ def shift(filenames, hours):
             for tag in TAGS:
                 tag, val = meta.getfirst(['SubSec' + tag, tag])
                 if val:
-                    val_shifted = shift_datetime(val, hours)
+                    val_shifted = shift_datetime(val, days, hours)
                     yield (basename, tag, val, val_shifted)
                     meta[tag] = val_shifted
         except FileFormatError:
