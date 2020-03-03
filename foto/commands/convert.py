@@ -88,8 +88,9 @@ def get_config_key(filename):
 
     has_audio = bool(
         int(meta.get('AudioChannels', '0')) > 0
+        or meta['AudioLayer']
+        or meta['AudioBitrate']
         or meta['AudioFormat']
-        or meta['AudioSampleRate']
     )
     audio_suffix = '' if has_audio else '-silent'
 
