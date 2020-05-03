@@ -129,3 +129,6 @@ converting:
     command: ffmpeg
     params: -i {in_filename} -map_metadata 0 -map_metadata:s:a 0:s:a -y -f mp3 {out_filename}
     out_ext: mp3
+
+packing:
+  photo_max_size: 1280

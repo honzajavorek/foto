@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import click
 
@@ -14,7 +14,7 @@ logger = Logger('foto')
 @click.version_option()
 @click.help_option()
 @click.option('-d', '--dir', 'base_dir',  # NOQA
-    default=os.getcwd(),
+    default=Path.cwd(),
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     help='Uses given directory instead of current directory',
     metavar='DIR',
@@ -34,7 +34,7 @@ def make_command(name, import_path, help):
         batch = obj['batch']
         base_dir = obj['base_dir']
 
-        directories = list_dirs(base_dir) if batch else [base_dir]
+        directories = list_dirs(base_dir) if batch else [Path(base_dir)]
         implementation = import_command(import_path)
 
         try:
@@ -134,6 +134,12 @@ commands = [
         'import_path': 'foto.commands.info.info_restore',
         'help': ('Reads Picasa.ini, feed.rss, etc. to restore album info'
                  ' & captions, writes info.yml and metadata instead')
+    },
+    {
+        'name': 'pack',
+        'import_path': 'foto.commands.pack.pack',
+        'help': ('Create a sharing-friendly zip file with contents'
+                 'of the directory'),
     }
 ]
 

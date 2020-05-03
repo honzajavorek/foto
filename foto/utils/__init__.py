@@ -2,6 +2,7 @@ import os
 import shlex
 import pipes
 import datetime
+from pathlib import Path
 
 try:
     import pync
@@ -36,7 +37,7 @@ def parse_cmd_args(s, **wildcards):
 def list_dirs(directory):
     filenames = (os.path.join(directory, basename) for basename
                  in os.listdir(directory))
-    return sorted(filename for filename
+    return sorted(Path(filename) for filename
                   in filenames if os.path.isdir(filename))
 
 
@@ -49,11 +50,11 @@ def list_files(directory, exts=None, recursive=False):
             filename = os.path.join(directory, basename)
             if recursive and os.path.isdir(filename):
                 for filename in list_files(filename, exts, recursive=True):
-                    yield filename
+                    yield Path(filename)
                 continue
             elif exts and not os.path.splitext(filename)[1].lower() in exts:
                 continue
-            yield filename
+            yield Path(filename)
 
     return sorted(list_dir(directory))
 
