@@ -136,10 +136,16 @@ commands = [
                  ' & captions, writes info.yml and metadata instead')
     },
     {
-        'name': 'pack',
-        'import_path': 'foto.commands.pack.pack',
+        'name': 'share:zip',
+        'import_path': 'foto.commands.share.zip',
         'help': ('Create a sharing-friendly zip file with contents'
-                 'of the directory'),
+                 'of given directory'),
+    },
+    {
+        'name': 'share:icloud',
+        'import_path': 'foto.commands.share.icloud',
+        'help': ('Create a sharing-friendly zip file with contents'
+                 'of given directory and put it to the iCloud directory'),
     }
 ]
 

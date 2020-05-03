@@ -13,13 +13,16 @@ from foto import config
 from foto.logger import Logger
 
 
-__all__ = ['pack']
+__all__ = ['zip']
 
 
-def pack(directory):
-    logger = Logger('pack')
+ICLOUD_DIR = Path('~') / 'Library' / 'Mobile Documents' / 'com~apple~CloudDocs'
 
-    zip_file = Path.cwd() / directory.with_suffix('.zip').name
+
+def zip(directory):
+    logger = Logger('zip')
+
+    zip_file = Path.cwd() / normalize(directory.with_suffix('.zip').name)
     if zip_file.exists():
         logger.err(f'Exists! {zip_file}')
         return
@@ -52,7 +55,7 @@ def pack(directory):
                 file_out.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(file_in, file_out)
 
-        size = config['packing']['photo_max_size']
+        size = config['share']['photo_max_size']
         for file_photo in tmp_dir.rglob('*.*'):
             if parse_ext(file_photo) not in config['photo_exts']:
                 continue
@@ -71,12 +74,32 @@ def pack(directory):
                 z.write(filename, filename_rel)
 
         logger.log(click.style(str(zip_file), bold=True))
+        return zip_file
+
+
+def icloud(directory):
+    zip_file_in = zip(directory)
+    zip_file_out = ICLOUD_DIR.expanduser() / zip_file_in.name
+
+    logger = Logger('icloud')
+    logger.log(click.style(str(zip_file_out), bold=True))
+    shutil.move(zip_file_in, zip_file_out)
 
 
 def normalize(path):
     path = Path(re.sub(r'\.jpeg$', '.jpg', str(path), re.I))
-    clean = functools.partial(slugify, regex_pattern=r'[^a-z0-9\-_\.]')
-    return Path(*list(map(clean, path.parts)))
+
+    parts = list(path.parts)
+    suffix = path.suffix
+    parts[-1] = re.sub(rf'{re.escape(suffix)}$', '', parts[-1])
+
+    clean = functools.partial(slugify,
+                              regex_pattern=r'[^\-a-z0-9_]+',
+                              max_length=100)
+    parts = list(map(clean, parts))
+    parts[-1] = parts[-1] + suffix.lower()
+
+    return Path(*parts)
 
 
 def parse_ext(path):
