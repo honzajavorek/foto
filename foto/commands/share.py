@@ -19,10 +19,10 @@ __all__ = ['zip']
 ICLOUD_DIR = Path('~') / 'Library' / 'Mobile Documents' / 'com~apple~CloudDocs'
 
 
-def zip(directory):
+def zip(dir):
     logger = Logger('zip')
 
-    zip_file = Path.cwd() / normalize(directory.with_suffix('.zip').name)
+    zip_file = Path.cwd() / normalize(dir.with_suffix('.zip').name)
     if zip_file.exists():
         logger.err(f'Exists! {zip_file}')
         return
@@ -30,10 +30,10 @@ def zip(directory):
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_dir = Path(tmp_dir)
 
-        for file_in in directory.rglob(f'*.*'):
+        for file_in in dir.rglob(f'*.*'):
             ext = parse_ext(file_in)
             if ext == 'heic':
-                file_out_rel = file_in.relative_to(directory).with_suffix('.jpg')
+                file_out_rel = file_in.relative_to(dir).with_suffix('.jpg')
                 file_out_rel = normalize(file_out_rel)
 
                 file_out = tmp_dir / file_out_rel
@@ -41,12 +41,12 @@ def zip(directory):
 
                 file_out_fmt = f'(zip)/{file_out_rel}'
                 file_out_fmt = click.style(file_out_fmt, fg='green')
-                logger.log(f"{file_in.relative_to(directory)} → {file_out_fmt}")
+                logger.log(f"{file_in.relative_to(dir)} → {file_out_fmt}")
 
                 run(['magick', 'convert', file_in, file_out], check=True)
 
             elif ext in config['media_exts']:
-                file_in_rel = file_in.relative_to(directory)
+                file_in_rel = file_in.relative_to(dir)
                 file_out = tmp_dir / normalize(file_in_rel)
                 file_out_rel = file_out.relative_to(tmp_dir)
                 file_out_fmt = click.style(f'(zip)/{file_out_rel}', fg='green')
@@ -77,8 +77,8 @@ def zip(directory):
         return zip_file
 
 
-def icloud(directory):
-    zip_file_in = zip(directory)
+def icloud(dir):
+    zip_file_in = zip(dir)
     zip_file_out = ICLOUD_DIR.expanduser() / zip_file_in.name
 
     logger = Logger('icloud')

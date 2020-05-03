@@ -69,6 +69,6 @@ def captions_clean(directory):
         try:
             caption = meta.get_caption()
             meta.remove_caption()
-            logger.log('{}: {} → {}'.format(basename_fmt, caption or ' - ', ' - '))
+            logger.log(f"{basename_fmt}: {caption or ' - '} →  - ")
         except FileFormatError:
             logger.log('{}:  -  (not an image file)'.format(basename_fmt))
