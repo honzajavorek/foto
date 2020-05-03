@@ -76,11 +76,8 @@ def to_naive(dt):
 
 def shift_datetime(dt, days, hours):
     if isinstance(dt, datetime.time):
-        if days == 0:
-            return (
-                datetime.datetime.combine(datetime.date(10, 10, 10), dt)
-                + datetime.timedelta(hours=hours)
-            ).time()
-        else:
-            raise ValueError('Cannot shift days, got just time')
+        return (
+            datetime.datetime.combine(datetime.date(10, 10, 10), dt)
+            + datetime.timedelta(hours=hours)
+        ).time()
     return dt + datetime.timedelta(days=days, hours=hours)

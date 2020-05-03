@@ -68,9 +68,9 @@ def test_fix(fixtures_dir):
         os.path.join(fixtures_dir, basename)
         for basename in os.listdir(fixtures_dir)
     ]
-    list(shift(filenames, -2))
+    list(shift(filenames, -10, 2))
 
     assert (
         creation_datetime(os.path.join(fixtures_dir, 'P1000805.jpg'))
-        == datetime(2017, 7, 7, 15, 8, 0, 989000)
+        == datetime(2017, 6, 27, 19, 8, 0, 989000)
     )
