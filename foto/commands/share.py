@@ -30,7 +30,7 @@ def zip(dir):
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_dir = Path(tmp_dir)
 
-        for file_in in dir.rglob(f'*.*'):
+        for file_in in dir.rglob('*.*'):
             ext = parse_ext(file_in)
             if ext == 'heic':
                 file_out_rel = file_in.relative_to(dir).with_suffix('.jpg')
