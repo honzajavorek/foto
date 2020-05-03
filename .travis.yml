@@ -7,10 +7,6 @@ addons:
   apt:
     packages:
       - "libimage-exiftool-perl"
-env:
-  global:  # 'travis encrypt PYPI_PASSWORD=... GH_TOKEN=...'
-    - PYPI_USERNAME=honzajavorek
-    - secure: "CMJmw6PHnP1N23SOAfxTvVKL7kUY0wHC7HrrXml8PDU05wJDUrUplMye+ZDJLiQdiHCyIQGuhjDMh4WdgTT2afK3/0HNgk9EXRQ52AQL1Ruakj/2S+U7vFi6zAvALP1jdB2PitnFhviXDoyfovBQuNFG5vfCvCcyu5qm/aTsOMA="
 install:
   - "pip install -e .[tests,release]"
 script:
@@ -23,4 +19,4 @@ after_success:
   - "coveralls"
   - "git config user.name 'Honza Javorek'"
   - "git config user.email 'mail@honzajavorek.cz'"
-  - "python setup.py publish"
+  - "python setup.py publish"  # requires GH_TOKEN, PYPI_USERNAME, PYPI_PASSWORD
