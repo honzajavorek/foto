@@ -194,5 +194,5 @@ def prepare_names(filename, out_ext):
     out_filename = os.path.join(directory, out_basename)
     metadata = os.path.join(directory, '{}.xml'.format(base))
 
-    return Names(filename, basename, out_filename, out_basename,
+    return Names(str(filename), basename, out_filename, out_basename,
                  directory, metadata)
