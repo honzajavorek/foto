@@ -1,5 +1,6 @@
 import os
 import re
+from multiprocessing import Pool
 
 import click
 
@@ -42,7 +43,8 @@ def names_sort(directory):
         logger.log('Looks like already sorted')  # keep manual changes
         return
 
-    datetimes = [to_naive(creation_datetime(f)) for f in unsorted_filenames]
+    datetimes = Pool().map(creation_datetime, unsorted_filenames)
+    datetimes = map(to_naive, datetimes)
     filenames_by_datetimes = list(zip(datetimes, unsorted_filenames))
     filenames = [
         filename for datetime, filename in sorted(filenames_by_datetimes)
