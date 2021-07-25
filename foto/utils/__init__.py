@@ -3,13 +3,13 @@ import shlex
 import pipes
 import datetime
 from pathlib import Path
+import subprocess
 
 try:
     import pync
 except (Exception, ImportError):
     pync = None
 
-from plumbum.cmd import file as file_cmd
 from send2trash import send2trash as to_trash
 
 from .metadata import Metadata, FileFormatError
@@ -59,8 +59,13 @@ def list_files(directory, exts=None, recursive=False):
     return sorted(list_dir(directory))
 
 
+def mimetype(filename):
+    process = subprocess.run(['file', '--mime', '--brief', str(filename)], check=True, capture_output=True)
+    return process.stdout.decode('utf-8').strip()
+
+
 def is_corrupted_file(filename):
-    return file_cmd(filename).strip() == '{}: data'.format(filename)
+    return mimetype(filename) == 'application/octet-stream; charset=binary'
 
 
 def notify(name, message):

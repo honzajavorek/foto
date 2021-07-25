@@ -23,6 +23,7 @@ install_requires = [
     'lxml',
     'colorama',
     'python-slugify',
+    'osxphotos',
 ]
 tests_require = [
     'pytest-runner',

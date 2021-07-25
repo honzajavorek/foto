@@ -30,7 +30,7 @@ def info_restore(directory):
 
     try:
         with open(info_filename, encoding='utf8') as f:
-            info = yaml.load(f) or {}
+            info = yaml.safe_load(f) or {}
     except FileNotFoundError:
         info = {}
 

@@ -4,12 +4,16 @@ import shutil
 import functools
 from pathlib import Path
 from subprocess import run
+from multiprocessing import Pool
 import tempfile
+from datetime import timedelta
 
+import osxphotos
 import click
 from slugify import slugify
 
 from foto import config
+from foto.utils import creation_datetime, is_corrupted_file
 from foto.logger import Logger
 
 
@@ -17,6 +21,9 @@ __all__ = ['zip']
 
 
 ICLOUD_DIR = Path('~') / 'Library' / 'Mobile Documents' / 'com~apple~CloudDocs'
+
+AP_HIDE_FILENAME = '.applephotoshide'
+AP_MAX_BYTES = 500_000_000  # 500 MB
 
 
 def zip(dir):
@@ -84,6 +91,67 @@ def icloud(dir):
     logger = Logger('icloud')
     logger.log(click.style(str(zip_file_out), bold=True))
     shutil.move(zip_file_in, zip_file_out)
+
+
+def photos(dir):
+    logger = Logger('photos')
+    exts = config['photo_exts'] + config['video_exts']
+
+    files_all = set()
+    files_hidden = set()
+    for file_in in Path(dir).rglob('*.*'):
+        ext = file_in.suffix.lstrip('.').lower()
+        if ext not in exts:
+            continue
+        if ext in config['video_exts'] and file_in.stat().st_size > AP_MAX_BYTES:
+            logger.warn(f"Skipping {file_in.relative_to(dir)}, it's huge")
+            continue
+        if file_in.parent.name.endswith('_files'):
+            logger.warn(f"Skipping {file_in.relative_to(dir)}, looks like a file accompanying HTML of a saved web page")
+            continue
+        if any([(parent / AP_HIDE_FILENAME).exists() for parent in file_in.parents]):
+            files_hidden.add(file_in)
+        files_all.add(file_in)
+    logger.log(f'Found {len(files_all)} files')
+    logger.log(f'Processing {len(files_hidden)} of those files as hidden')
+
+    logger.log('Figuring out the oldest file in the set')
+    from_date = creation_datetime(sorted(files_all)[0]) - timedelta(days=30)
+    logger.log(f'Oldest file in the set: {from_date.isoformat()}')
+
+    logger.log('Reading Apple Photos')
+    photos_db = osxphotos.PhotosDB()
+    existing_files = {photo_info.original_filename for photo_info in photos_db.photos(from_date=from_date)}
+    files_new = {f for f in files_all if f not in existing_files and f not in files_hidden}
+    files_new_hidden = {f for f in files_hidden if f not in existing_files}
+    logger.log(f'Found {len(files_all)} new files')
+    logger.log(f'Processing {len(files_new_hidden)} of those new files as hidden')
+
+    logger.log(f'Copying new files')
+    photos_dir = Path.cwd() / f"apple-photos-import_{str(dir).replace('/', '!').strip('!')}"
+    shutil.rmtree(photos_dir, ignore_errors=True)
+    photos_dir.mkdir()
+    for file_in in files_new:
+        if is_corrupted_file(file_in):
+            logger.warn(f"Skipping {file_in.relative_to(dir)}, it's corrupted")
+            continue
+        file_out = photos_dir / f"{str(file_in).replace('/', '!').strip('!')}"
+        logger.log(f"{file_in.relative_to(dir)} → {file_out.relative_to(Path.cwd())}")
+        shutil.copy2(file_in, file_out)
+
+    logger.log(f'Copying new hidden files')
+    if not files_new_hidden:
+        return
+    photos_dir = Path.cwd() / f"apple-photos-import-hidden_{str(dir).replace('/', '!').strip('!')}"
+    shutil.rmtree(photos_dir, ignore_errors=True)
+    photos_dir.mkdir()
+    for file_in in files_new_hidden:
+        if is_corrupted_file(file_in):
+            logger.warn(f"Skipping {file_in.relative_to(dir)}, it's corrupted")
+            continue
+        file_out = photos_dir / f"{str(file_in).replace('/', '!').strip('!')}"
+        logger.log(f"{file_in.relative_to(dir)} → {file_out.relative_to(Path.cwd())}")
+        shutil.copy2(file_in, file_out)
 
 
 def normalize(path):
