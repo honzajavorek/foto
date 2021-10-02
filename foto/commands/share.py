@@ -4,7 +4,6 @@ import shutil
 import functools
 from pathlib import Path
 from subprocess import run
-from multiprocessing import Pool
 import tempfile
 from datetime import timedelta
 
@@ -121,7 +120,10 @@ def photos(dir):
 
     logger.log('Reading Apple Photos')
     photos_db = osxphotos.PhotosDB()
-    existing_files = {photo_info.original_filename for photo_info in photos_db.photos(from_date=from_date)}
+    existing_files = set(filter(None, (
+        parse_original_filename(photo_info.original_filename) for photo_info
+        in photos_db.photos(from_date=from_date)
+    )))
     files_new = {f for f in files_all if f not in existing_files and f not in files_hidden}
     files_new_hidden = {f for f in files_hidden if f not in existing_files}
     logger.log(f'Found {len(files_all)} new files')
@@ -152,6 +154,12 @@ def photos(dir):
         file_out = photos_dir / f"{str(file_in).replace('/', '!').strip('!')}"
         logger.log(f"{file_in.relative_to(dir)} → {file_out.relative_to(Path.cwd())}")
         shutil.copy2(file_in, file_out)
+
+
+def parse_original_filename(original_filename):
+    if original_filename.startswith('Volumes!STASH'):
+        return Path('/' + original_filename.replace('!', '/'))
+    return None
 
 
 def normalize(path):
