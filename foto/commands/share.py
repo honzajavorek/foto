@@ -115,18 +115,13 @@ def photos(dir):
     logger.log(f'Processing {len(files_hidden)} of those files as hidden')
 
     logger.log('Figuring out the oldest file in the set')
-    from_date = creation_datetime(sorted(files_all)[0]) - timedelta(days=30)
-    logger.log(f'Oldest file in the set: {from_date.isoformat()}')
 
     logger.log('Reading Apple Photos')
     photos_db = osxphotos.PhotosDB()
-    existing_files = set(filter(None, (
-        parse_original_filename(photo_info.original_filename) for photo_info
-        in photos_db.photos(from_date=from_date)
-    )))
-    files_new = {f for f in files_all if f not in existing_files and f not in files_hidden}
-    files_new_hidden = {f for f in files_hidden if f not in existing_files}
-    logger.log(f'Found {len(files_all)} new files')
+    existing_files = {photo_info.original_filename for photo_info in photos_db.photos()}
+    files_new = {f for f in files_all if filename(f) not in existing_files and f not in files_hidden}
+    files_new_hidden = {f for f in files_hidden if filename(f) not in existing_files}
+    logger.log(f'Found {len(files_new)} new files')
     logger.log(f'Processing {len(files_new_hidden)} of those new files as hidden')
 
     logger.log(f'Copying new files')
@@ -151,15 +146,13 @@ def photos(dir):
         if is_corrupted_file(file_in):
             logger.warn(f"Skipping {file_in.relative_to(dir)}, it's corrupted")
             continue
-        file_out = photos_dir / f"{str(file_in).replace('/', '!').strip('!')}"
+        file_out = photos_dir / filename(file_in)
         logger.log(f"{file_in.relative_to(dir)} → {file_out.relative_to(Path.cwd())}")
         shutil.copy2(file_in, file_out)
 
 
-def parse_original_filename(original_filename):
-    if original_filename.startswith('Volumes!STASH'):
-        return Path('/' + original_filename.replace('!', '/'))
-    return None
+def filename(path):
+    return f"{str(path).replace('/', '!').strip('!')}"
 
 
 def normalize(path):
