@@ -18,9 +18,10 @@ def arrange(directory):
         date = creation_datetime(filename).date()
         new_dir_basename = '{0:%Y-%m-%d}'.format(date)
 
-        loc = location(filename, **config['geocoding'])
-        if loc and loc.city:
-            new_dir_basename += ' {}, {}'.format(loc.city, loc.country)
+        # FIXME turn off geocoding by default
+        # loc = location(filename, **config['geocoding'])
+        # if loc and loc.city:
+        #     new_dir_basename += ' {}, {}'.format(loc.city, loc.country)
 
         new_dir_filename = os.path.join(directory, new_dir_basename)
         try:
@@ -29,11 +30,12 @@ def arrange(directory):
             if e.errno != 17:  # file already exists
                 raise
 
-        # create arrange file with index of moved files
-        index_basename = config['index_basename']
-        index_filename = os.path.join(new_dir_filename, index_basename)
-        with open(index_filename, 'a') as f:
-            f.write('{0}\n'.format(filename))
+        # FIXME turn off creating .arrange file by default
+        # # create arrange file with index of moved files
+        # index_basename = config['index_basename']
+        # index_filename = os.path.join(new_dir_filename, index_basename)
+        # with open(index_filename, 'a') as f:
+        #     f.write('{0}\n'.format(filename))
 
         # move
         new_filename = os.path.join(new_dir_filename, basename)
