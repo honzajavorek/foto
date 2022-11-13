@@ -1,4 +1,0 @@
-recursive-include foto *
-recursive-include tests *
-global-exclude *.py[co] *~
-include README* setup.* LICENSE CREDITS
